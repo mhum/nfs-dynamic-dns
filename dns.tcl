@@ -24,6 +24,8 @@ proc updateIPs {current_ip domain_ip} {
 	::nfs::Http::addDomain $current_ip
 
 	if {[::nfs::Utility::doIPsMatch]} {
+		set domain_ip [::nfs::Http::fetchDomainIP]
+
 		puts "IPs match now! Current IP: $current_ip Domain IP: $domain_ip"
 		exit
 	} else {
