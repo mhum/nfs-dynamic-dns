@@ -4,7 +4,7 @@ package require nfsHttp
 
 namespace eval ::nfs::Utility:: {
 
-    namespace export randomRangeString doIPsMatch
+    namespace export randomRangeString doIPsMatch validateResponse
 }
 
 proc ::nfs::Utility::randomRangeString {length} {
@@ -24,4 +24,13 @@ proc ::nfs::Utility::doIPsMatch {} {
 	set current_ip [::nfs::Http::fetchCurrentIP]
 
 	return [expr {$domain_ip == $current_ip} ? 1 : 0]
+}
+
+proc ::nfs::Utility::validateResponse {resp} {
+  if {[dict exists $resp error]} {
+    puts "ERROR: [dict get $resp error]"
+    puts "ERROR: [dict get $resp debug]"
+
+    exit
+  }
 }

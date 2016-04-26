@@ -20,7 +20,10 @@ namespace eval ::nfs:: {
 proc updateIPs {current_ip domain_ip} {
 	puts "Current IP: $current_ip doesn't match Domain IP: $domain_ip"
 
-	::nfs::Http::removeDomain $domain_ip
+	if {$domain_ip ne {0.0.0.0}} {
+		::nfs::Http::removeDomain $domain_ip
+	}
+
 	::nfs::Http::addDomain $current_ip
 
 	if {[::nfs::Utility::doIPsMatch]} {

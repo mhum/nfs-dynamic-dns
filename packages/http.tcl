@@ -22,6 +22,8 @@ proc ::nfs::Http::getRequest {uri {body { }}} {
 	set token [http::geturl $url -headers $header -query $body]
 	set resp_data [http::data $token]
 
+	::nfs::Utility::validateResponse $resp_data
+
 	http::cleanup $token
 	http::unregister https
 
@@ -47,7 +49,15 @@ proc ::nfs::Http::fetchDomainIP {} {
 	set body "name=$::nfs::CFG(subdomain)"
 
 	set data [getRequest $uri $body]
+
+	# Response will be empty if domain is not set
+	if {$data eq {[]} } {
+		return "0.0.0.0"
+	}
+
 	set resp_data [json::json2dict $data]
+
+	::nfs::Utility::validateResponse $resp_data
 
 	set ip [dict get [lindex $resp_data 0] data]
 
@@ -63,6 +73,9 @@ proc ::nfs::Http::removeDomain {domain_ip} {
 	set body "name=$::nfs::CFG(subdomain)&type=A&data=$domain_ip"
 
 	set data [getRequest $uri $body]
+	set resp_data [json::json2dict $data]
+
+	::nfs::Utility::validateResponse $resp_data
 }
 
 proc ::nfs::Http::addDomain {current_ip} {
