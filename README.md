@@ -23,7 +23,7 @@ subdomain SUBDOMAIN
 ```
 ```
 username    --Your NFSN username
-api_key     --API key for using NFSN's APIs. This can be obtained via a service request
+api_key     --API key for using NFSN's APIs. This can be obtained via the Member Interface > "Profile" tab > "Actions" > "Manage API Key".
 domain      ---Domain that the subdomain belongs to
 subdomain   ---Subdomain to update with the script
 ```
