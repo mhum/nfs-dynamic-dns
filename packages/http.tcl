@@ -13,13 +13,13 @@ namespace eval ::nfs::Http:: {
 }
 
 proc ::nfs::Http::getRequest {uri {body { }}} {
-
 	set url "https://api.nearlyfreespeech.net$uri"
 	set header [createHeader $uri $body]
 
 	http::register https 443 [list ::tls::socket -tls1 1]
 
-	set token [http::geturl $url -headers $header -query $body]
+	try {set token [http::geturl $url -headers $header -query $body]}
+	
 	set resp_data [http::data $token]
 
 	::nfs::Utility::validateResponse $resp_data
@@ -31,7 +31,6 @@ proc ::nfs::Http::getRequest {uri {body { }}} {
 }
 
 proc ::nfs::Http::fetchCurrentIP {} {
-
 	set url "http://ipinfo.io/ip"
 
 	set token [http::geturl $url]
@@ -51,7 +50,8 @@ proc ::nfs::Http::fetchDomainIP {} {
 	set data [getRequest $uri $body]
 
 	# Response will be empty if domain is not set
-	if {$data eq {[]} } {
+	if {$data eq {[]}} {
+		puts "No IP address is currently set."
 		return "0.0.0.0"
 	}
 
@@ -67,21 +67,33 @@ proc ::nfs::Http::fetchDomainIP {} {
 proc ::nfs::Http::removeDomain {domain_ip} {
 	variable ::nfs::CFG
 
-	puts "Removing $::nfs::CFG(subdomain).$::nfs::CFG(domain)..."
+	if {$::nfs::CFG(subdomain) eq ""} {
+		puts "Removing $::nfs::CFG(domain)..."
+	} else {
+		puts "Removing $::nfs::CFG(subdomain).$::nfs::CFG(domain)..."
+	}
 
 	set uri "/dns/$::nfs::CFG(domain)/removeRR"
 	set body "name=$::nfs::CFG(subdomain)&type=A&data=$domain_ip"
 
 	set data [getRequest $uri $body]
-	set resp_data [json::json2dict $data]
 
+	if {[catch {set resp_data [json::json2dict $data]}]} {
+		puts "Response to removeRR request isn't valid JSON. That's probably fine."
+		return
+	}
+	
 	::nfs::Utility::validateResponse $resp_data
 }
 
 proc ::nfs::Http::addDomain {current_ip} {
 	variable ::nfs::CFG
 
-	puts "Setting $::nfs::CFG(subdomain).$::nfs::CFG(domain) to $current_ip..."
+	if {$::nfs::CFG(subdomain) eq ""} {
+		puts "$::nfs::CFG(domain) to $current_ip..."
+	} else {
+		puts "Setting $::nfs::CFG(subdomain).$::nfs::CFG(domain) to $current_ip..."
+	}
 
 	set uri "/dns/$::nfs::CFG(domain)/addRR"
 	set body "name=$::nfs::CFG(subdomain)&type=A&data=$current_ip"
