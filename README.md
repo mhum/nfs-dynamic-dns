@@ -1,7 +1,7 @@
 # NearlyFreeSpeech.NET Dynamic DNS
-This script will update the A DNS record for a subdomain at [NearlyFreeSpeech.NET](https://www.nearlyfreespeech.net)
+This script will update the A DNS record for a domain/subdomain at [NearlyFreeSpeech.NET](https://www.nearlyfreespeech.net)
 with the public IP address for the machine the script runs on. Run this script on a server in which the public IP
-address is dynamic and changes so your subdomain is always up to date.
+address is dynamic and changes so your domain is always up to date.
 
 ## How It Works
 There are two steps to this script. First, it retrieves the configured IP address for the subdomain, the current public
@@ -25,7 +25,7 @@ subdomain SUBDOMAIN
 username    --Your NFSN username
 api_key     --API key for using NFSN's APIs. This can be obtained via the Member Interface > "Profile" tab > "Actions" > "Manage API Key".
 domain      ---Domain that the subdomain belongs to
-subdomain   ---Subdomain to update with the script
+subdomain   ---Subdomain to update with the script. Leave blank for the bare domain name.
 ```
 
 ## Running
