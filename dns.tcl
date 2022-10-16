@@ -18,10 +18,18 @@ namespace eval ::nfs:: {
 }
 
 proc updateIPs {current_ip domain_ip} {
-	puts "Current IP: $current_ip doesn't match Domain IP: $domain_ip"
+	# When there's no existing record for a domain name, the
+	# listRRs API query returns the domain name of the name server.
+	if {[string first "nearlyfreespeech.net" $domain_ip] ne -1} {
+		puts "The domain IP doesn't appear to be set yet."
+	} else {
+		puts "Current IP: $current_ip doesn't match Domain IP: $domain_ip"
 
-	if {$domain_ip ne {0.0.0.0}} {
-		::nfs::Http::removeDomain $domain_ip
+		# The case where the server returns 0.0.0.0 is probably
+		# vestigial, but I'm leaving it in just in case.
+		if {$domain_ip ne {0.0.0.0}} {
+			::nfs::Http::removeDomain $domain_ip
+		}
 	}
 
 	::nfs::Http::addDomain $current_ip
