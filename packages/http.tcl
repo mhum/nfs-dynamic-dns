@@ -31,7 +31,7 @@ proc ::nfs::Http::getRequest {uri {body { }}} {
 }
 
 proc ::nfs::Http::fetchCurrentIP {} {
-	set url "http://ipinfo.io/ip"
+	set url "http://ident.me"
 
 	set token [http::geturl $url]
 	set data [http::data $token]
