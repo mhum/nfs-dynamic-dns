@@ -29,9 +29,15 @@ subdomain   ---Subdomain to update with the script. Leave blank for the bare dom
 ```
 
 ## Running
+### Manually
 It is as easy as running: `tclsh dns.tcl`
 
 or make it executable with `chmod u+x dns.tcl` and then run `./dns.tcl`
+
+### With Docker
+1. set the configuration values in the script the way you want them
+2. build the image with `docker build -t nfs-dynamic-dns .`
+3. run the image with `docker run -v /path/on/host/to/log/storage/:/logs nfs-dynamic-dns`
 
 ## Scheduling
 It can even be setup to run as a cron job to completely automate this process. Something such as:
