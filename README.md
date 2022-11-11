@@ -37,7 +37,7 @@ or make it executable with `chmod u+x dns.tcl` and then run `./dns.tcl`
 ### With Docker
 1. set the configuration values in the script the way you want them
 2. build the image with `docker build -t nfs-dynamic-dns .`
-3. run the image with `docker run -v /path/on/host/to/log/storage/:/logs nfs-dynamic-dns`
+3. run the image with `docker run -d -v /path/on/host/to/log/storage/:/logs nfs-dynamic-dns`
 
 ## Scheduling
 It can even be setup to run as a cron job to completely automate this process. Something such as:
