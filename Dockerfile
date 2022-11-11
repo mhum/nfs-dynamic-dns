@@ -11,3 +11,4 @@ RUN apk add tcl
 RUN mkdir /logs
 WORKDIR /root
 RUN echo $(crontab -l ; echo "*/5     *       *       *       *       /root/dns.tcl 2>&1 > /logs/$(date -Iseconds).log") | crontab -
+ENTRYPOINT ["crond", "-f"]
