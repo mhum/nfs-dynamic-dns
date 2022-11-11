@@ -9,10 +9,10 @@ namespace eval ::nfs:: {
 	variable CFG
 #------------------------------CONFIG----------------------------------------------#
 	foreach {config value} {
-		username  USERNAME
-		api_key   API_KEY
-		domain    DOMAIN
-		subdomain SUBDOMAIN
+		username  ::env(USERNAME)
+		api_key   ::env(API_KEY)
+		domain    ::env(DOMAIN)
+		subdomain ::env(SUBDOMAIN)
 	} {set CFG($config) $value}
 #------------------------------END CONFIG------------------------------------------#
 }
