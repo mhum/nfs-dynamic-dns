@@ -8,12 +8,12 @@ namespace eval ::nfs:: {
 
 	variable CFG
 #------------------------------CONFIG----------------------------------------------#
-	foreach {config value} {
-		username  ::env(USERNAME)
-		api_key   ::env(API_KEY)
-		domain    ::env(DOMAIN)
-		subdomain ::env(SUBDOMAIN)
-	} {set CFG($config) $value}
+foreach {config value} [list\
+		username  $::env(USERNAME)\
+		api_key   $::env(API_KEY)\
+		domain    $::env(DOMAIN)\
+		subdomain $::env(SUBDOMAIN)\
+] {set CFG($config) $value}
 #------------------------------END CONFIG------------------------------------------#
 }
 
