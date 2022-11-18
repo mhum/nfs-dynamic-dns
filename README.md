@@ -12,7 +12,7 @@ the subdomain with the new IP address.
 [Tcl](http://www.tcl.tk/software/tcltk) and [Tcllib](http://www.tcl.tk/software/tcllib) are the only two requirements. They come pre-installed on most *nix operating systems.
 
 ## Configuring
-Configurations are set straight within the `dns.tcl` file in the `CONFIG` section.
+Configurations are set by providing the script with environment variables
 
 ### Configs
 ```
