@@ -35,9 +35,18 @@ It is as easy as running: `tclsh dns.tcl`
 or make it executable with `chmod u+x dns.tcl` and then run `./dns.tcl`
 
 ### With Docker
-1. set the configuration values in the script the way you want them
+1. set the configuration values in the script the way you want them (or create a file containing the environment variables)
 2. build the image with `docker build -t nfs-dynamic-dns .`
-3. run the image with `docker run -d --name nfsn-dynamic-dns -v /path/on/host/to/log/storage/:/logs nfs-dynamic-dns`
+3. run the image (production) with `docker run -d --name nfsn-dynamic-dns -v /path/on/host/to/log/storage/:/logs nfs-dynamic-dns` (add the `--envfile <file>` argument before the last `nfsn-dynamic-dns` if you want to use your environment variable file)
+
+#### Development
+To run the container locally (and let it run its cronjobs), use this command:
+`docker run -it --rm --init nfs-dynamic-dns`
+
+to run the container locally and be put into a shell where you can run `./dns.tcl` yourself use this:
+`docker run -it --rm --init nfs-dynamic-dns sh`
+
+If your setup uses environment variables, you will also need to add the `--envfile` argument (or specify variables individually with [the `-e` docker flag](https://docs.docker.com/engine/reference/run/#env-environment-variables)).
 
 ## Scheduling
 It can even be setup to run as a cron job to completely automate this process. Something such as:
