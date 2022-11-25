@@ -21,5 +21,5 @@ RUN curl -sSL https://github.com/tcltk/tcllib/archive/release.tar.gz | tar -xz -
 
 RUN mkdir /logs
 WORKDIR /root
-RUN echo "$(crontab -l 2>&1; echo "*/5     *       *       *      *       /root/dns.tcl 2>&1 > /logs/$(date -Iseconds).log")" | crontab -
+RUN echo "$(crontab -l 2>&1; echo "*/5     *       *       *       *       /root/dns.tcl 2>&1 > /logs/$(date -Iseconds).log")" | crontab -
 ENTRYPOINT ["crond", "-f"]
