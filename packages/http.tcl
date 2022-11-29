@@ -31,9 +31,9 @@ proc ::nfs::Http::getRequest {uri {body { }}} {
 }
 
 proc ::nfs::Http::fetchCurrentIP {} {
-	set url "http://ipinfo.io/ip"
+	variable ::nfs::CFG
 
-	set token [http::geturl $url]
+	set token [http::geturl $::nfs::CFG(ip_provider)]
 	set data [http::data $token]
 
 	http::cleanup $token

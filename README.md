@@ -19,9 +19,10 @@ Configurations are set by providing the script with environment variables
 | Env Variable | Required | Description |
 | --- | --- | --- |
 | USERNAME | Y | Your NFSN username |
-| API_KEY | Y | API key for using NFSN's APIs. This can be obtained via the Member Interface > "Profile" tab > "Actions" > "Manage API Key".|
+| API_KEY | Y | API key for using NFSN's APIs. This can be obtained via the Member Interface > "Profile" tab > "Actions" > "Manage API Key" |
 | DOMAIN | Y | Domain that the subdomain belongs to |
-| SUBDOMAIN | N | Subdomain to update with the script. Leave blank for the bare domain name. |
+| SUBDOMAIN | N | Subdomain to update with the script. Leave blank for the bare domain name |
+| IP_PROVIDER | N | Use a different IP providing service than the default: [http://ipinfo.io/ip](http://ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
 
 ## Running
 ### Manually

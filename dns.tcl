@@ -9,8 +9,13 @@ namespace eval ::nfs:: {
 	variable CFG
 #------------------------------CONFIG----------------------------------------------#
 	set subdomain ""
-	if { [info exists ::env(SUBDOMAIN)] } {
+	if {[info exists ::env(SUBDOMAIN)]} {
 	    set subdomain $::env(SUBDOMAIN)
+	}
+
+	set ip_provider "http://ipinfo.io/ip"
+	if {[info exists ::env(IP_PROVIDER)]} {
+	    set ip_provider $::env(IP_PROVIDER)
 	}
 
 	foreach {config value} [list\
@@ -18,6 +23,7 @@ namespace eval ::nfs:: {
 			api_key   $::env(API_KEY)\
 			domain    $::env(DOMAIN)\
 			subdomain $subdomain\
+			ip_provider $ip_provider\
 	] {set CFG($config) $value}
 #------------------------------END CONFIG------------------------------------------#
 }
