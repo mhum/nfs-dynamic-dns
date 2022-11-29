@@ -8,11 +8,16 @@ namespace eval ::nfs:: {
 
 	variable CFG
 #------------------------------CONFIG----------------------------------------------#
+	set subdomain ""
+	if { [info exists ::env(SUBDOMAIN)] } {
+	    set subdomain $::env(SUBDOMAIN)
+	}
+
 	foreach {config value} [list\
 			username  $::env(USERNAME)\
 			api_key   $::env(API_KEY)\
 			domain    $::env(DOMAIN)\
-			subdomain $::env(SUBDOMAIN)\
+			subdomain $subdomain\
 	] {set CFG($config) $value}
 #------------------------------END CONFIG------------------------------------------#
 }
