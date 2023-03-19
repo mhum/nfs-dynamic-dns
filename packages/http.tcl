@@ -16,7 +16,7 @@ proc ::nfs::Http::getRequest {uri {body { }}} {
 	set url "https://api.nearlyfreespeech.net$uri"
 	set header [createHeader $uri $body]
 
-	http::register https 443 [list ::tls::socket -tls1 1]
+	http::register https 443 [list ::tls::socket -tls1 1 -autoservername 1]
 
 	try {set token [http::geturl $url -headers $header -query $body]}
 	
