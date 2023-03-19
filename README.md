@@ -42,6 +42,25 @@ $ export USERNAME=username API_KEY=api_key DOMAIN=domain.com SUBDOMAIN=subdomain
 
 	Ex: `docker run -d --name nfsn-dynamic-dns --env-file .env nfs-dynamic-dns`
 
+## With Docker Compose
+You can use the following config to run this with [docker compose](https://docs.docker.com/compose/).
+```yaml
+version: "3"
+
+services:
+  nfs-dynamic-dns:
+    image: nfs-dynamic-dns
+    build: ./nfs-dynamic-dns
+    container_name: nfs-dynamic-dns
+    network_mode: host
+    environment:
+     - USERNAME=username
+     - API_KEY=api_key
+     - DOMAIN=domain.com
+     - SUBDOMAIN=subdomain
+    restart: unless-stopped
+ ```
+
 #### Development
 To run the container locally (and let it run its cronjobs), use this command:
 `docker run -it --rm --init nfs-dynamic-dns`

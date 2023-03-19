@@ -19,7 +19,7 @@ proc ::nfs::Http::getRequest {uri {body { }}} {
 	http::register https 443 [list ::tls::socket -tls1 1 -autoservername 1]
 
 	try {set token [http::geturl $url -headers $header -query $body]}
-	
+
 	set resp_data [http::data $token]
 
 	::nfs::Utility::validateResponse $resp_data
