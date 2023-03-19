@@ -29,12 +29,13 @@ namespace eval ::nfs:: {
 }
 
 proc updateIPs {current_ip domain_ip} {
+	set now [clock seconds]
 	# When there's no existing record for a domain name, the
 	# listRRs API query returns the domain name of the name server.
 	if {[string first "nearlyfreespeech.net" $domain_ip] ne -1} {
-		puts "The domain IP doesn't appear to be set yet."
+		puts "[clock format $now -format {%y-%m-%d %H:%M:%S}]: The domain IP doesn't appear to be set yet."
 	} else {
-		puts "Current IP: $current_ip doesn't match Domain IP: $domain_ip"
+		puts "[clock format $now -format {%y-%m-%d %H:%M:%S}]: Current IP: $current_ip doesn't match Domain IP: $domain_ip"
 
 		# The case where the server returns 0.0.0.0 is probably
 		# vestigial, but I'm leaving it in just in case.
@@ -47,11 +48,12 @@ proc updateIPs {current_ip domain_ip} {
 
 	if {[::nfs::Utility::doIPsMatch]} {
 		set domain_ip [::nfs::Http::fetchDomainIP]
+		set now [clock seconds]
 
-		puts "IPs match now! Current IP: $current_ip Domain IP: $domain_ip"
+		puts "[clock format $now -format {%y-%m-%d %H:%M:%S}]: IPs match now! Current IP: $current_ip Domain IP: $domain_ip"
 		exit
 	} else {
-		puts "They still don't match. Current IP: $current_ip Domain IP: $domain_ip"
+		puts "[clock format $now -format {%y-%m-%d %H:%M:%S}]: They still don't match. Current IP: $current_ip Domain IP: $domain_ip"
 		exit
 	}
 }
@@ -59,9 +61,10 @@ proc updateIPs {current_ip domain_ip} {
 proc compareIPs {} {
 	set domain_ip [::nfs::Http::fetchDomainIP]
 	set current_ip [::nfs::Http::fetchCurrentIP]
+	set now [clock seconds]
 
 	if {[::nfs::Utility::doIPsMatch]} {
-		puts "IPs still match! Current IP: $current_ip Domain IP: $domain_ip"
+		puts "[clock format $now -format {%y-%m-%d %H:%M:%S}]: IPs still match! Current IP: $current_ip Domain IP: $domain_ip"
 		exit
 	} else {
 		updateIPs $current_ip $domain_ip
