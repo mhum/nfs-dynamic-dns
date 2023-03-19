@@ -42,7 +42,7 @@ $ export USERNAME=username API_KEY=api_key DOMAIN=domain.com SUBDOMAIN=subdomain
 
 	Ex: `docker run -d --name nfsn-dynamic-dns --env-file .env nfs-dynamic-dns`
 
-## With Docker Compose
+### With Docker Compose
 You can use the following config to run this with [docker compose](https://docs.docker.com/compose/).
 ```yaml
 version: "3"
