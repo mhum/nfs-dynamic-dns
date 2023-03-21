@@ -79,6 +79,7 @@ When using the Docker file, it's by default scheduled to run every 30 minutes. H
 container. The `CRON_SCHEDULE` [build arg](https://docs.docker.com/engine/reference/builder/#arg) can be overriden.
 
 With docker, the build step (step 2) can be done like this:
+
 `$ docker build --build-arg CRON_SCHEDULE="*/5 * * * *" -t nfs-dynamic-dns .`
 
 With docker compose, it can be done like this:
