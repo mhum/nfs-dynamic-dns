@@ -71,8 +71,31 @@ to run the container locally and be put into a shell where you can run `./dns.tc
 If your setup uses environment variables, you will also need to add the `--env-file` argument (or specify variables individually with [the `-e` docker flag](https://docs.docker.com/engine/reference/run/#env-environment-variables)). The `--env-file` option is for [docker run](https://docs.docker.com/engine/reference/commandline/run/) and the env file format can be found [here](https://docs.docker.com/compose/env-file/).
 
 ## Scheduling
-It can even be setup to run as a cron job to completely automate this process. Something such as:
+It can be setup to run as a cron job to completely automate this process. Something such as:
 > @hourly /usr/local/bin/tclsh /scripts/nfs-dynamic-dns/dns.tcl
+
+### Docker
+When using the Docker file, it's by default scheduled to run every 30 minutes. However, this is configurable when building the
+container. The `CRON_SCHEDULE` [build arg](https://docs.docker.com/engine/reference/builder/#arg) can be overriden.
+
+With docker, the build step (step 2) can be done like this:
+
+`$ docker build --build-arg CRON_SCHEDULE="*/5 * * * *" -t nfs-dynamic-dns .`
+
+With docker compose, it can be done like this:
+```yaml
+version: "3"
+
+services:
+  nfs-dynamic-dns:
+    image: nfs-dynamic-dns
+    build:
+      context: ./nfs-dynamic-dns
+      args:
+        - CRON_SCHEDULE=*/5 * * * *
+    container_name: nfs-dynamic-dns
+...
+ ```
 
 ## Troubleshooting
 The script communicates with NearlyFreeSpeech.NET via its RESTful API. Specifics about the API can be found [here](https://members.nearlyfreespeech.net/wiki/API/Introduction).

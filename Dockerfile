@@ -1,7 +1,5 @@
 FROM alpine:latest
 
-# docker run --rm -it -v /home/ace/Scripts/nfs-dynamic-dns:/root 
-
 COPY *.tcl /root/
 COPY packages/* /root/packages/
 COPY LICENSE /root/LICENSE
@@ -20,6 +18,10 @@ RUN curl -sSL https://github.com/tcltk/tcllib/archive/release.tar.gz | tar -xz -
 	rm -rf /tmp/tcllib*
 
 RUN mkdir /logs
+
 WORKDIR /root
-RUN echo "$(crontab -l 2>&1; echo "*/60     *       *       *       *       /root/dns.tcl")" | crontab -
+
+ARG CRON_SCHEDULE="*/30 * * * *"
+RUN echo "$(crontab -l 2>&1; echo "${CRON_SCHEDULE} /root/dns.tcl")" | crontab -
+
 CMD ["crond", "-f", "2>&1"]
