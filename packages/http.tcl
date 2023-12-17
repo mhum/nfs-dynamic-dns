@@ -9,7 +9,7 @@ package require nfsUtility
 
 namespace eval ::nfs::Http:: {
 
-    namespace export getRequest fetchCurrentIP fetchDomainIP removeDomain addDomain
+    namespace export getRequest fetchCurrentIP fetchDomainIP replaceDomain
 }
 
 proc ::nfs::Http::getRequest {uri {body { }}} {
@@ -46,13 +46,14 @@ proc ::nfs::Http::fetchDomainIP {} {
 
 	set uri "/dns/$::nfs::CFG(domain)/listRRs"
 	set body "name=$::nfs::CFG(subdomain)"
+	set now [clock seconds]
 
 	set data [getRequest $uri $body]
 
 	# Response will be empty if domain is not set
 	if {$data eq {[]}} {
-		puts "No IP address is currently set."
-		return "0.0.0.0"
+		puts "[clock format $now -format {%y-%m-%d %H:%M:%S}]: No IP address is currently set."
+		return "UNSET"
 	}
 
 	set resp_data [json::json2dict $data]
@@ -64,41 +65,27 @@ proc ::nfs::Http::fetchDomainIP {} {
 	return $ip
 }
 
-proc ::nfs::Http::removeDomain {domain_ip} {
+proc ::nfs::Http::replaceDomain {current_ip} {
 	variable ::nfs::CFG
 
-	if {$::nfs::CFG(subdomain) eq ""} {
-		puts "Removing $::nfs::CFG(domain)..."
-	} else {
-		puts "Removing $::nfs::CFG(subdomain).$::nfs::CFG(domain)..."
-	}
-
-	set uri "/dns/$::nfs::CFG(domain)/removeRR"
-	set body "name=$::nfs::CFG(subdomain)&type=A&data=$domain_ip"
-
-	set data [getRequest $uri $body]
-
-	if {[catch {set resp_data [json::json2dict $data]}]} {
-		puts "Response to removeRR request isn't valid JSON. That's probably fine."
-		return
-	}
-	
-	::nfs::Utility::validateResponse $resp_data
-}
-
-proc ::nfs::Http::addDomain {current_ip} {
-	variable ::nfs::CFG
+	set now [clock seconds]
 
 	if {$::nfs::CFG(subdomain) eq ""} {
-		puts "$::nfs::CFG(domain) to $current_ip..."
+		puts "[clock format $now -format {%y-%m-%d %H:%M:%S}]: Setting $::nfs::CFG(domain) to $current_ip..."
 	} else {
-		puts "Setting $::nfs::CFG(subdomain).$::nfs::CFG(domain) to $current_ip..."
+		puts "[clock format $now -format {%y-%m-%d %H:%M:%S}]: Setting $::nfs::CFG(subdomain).$::nfs::CFG(domain) to $current_ip..."
 	}
 
-	set uri "/dns/$::nfs::CFG(domain)/addRR"
+	set uri "/dns/$::nfs::CFG(domain)/replaceRR"
 	set body "name=$::nfs::CFG(subdomain)&type=A&data=$current_ip"
 
 	set data [getRequest $uri $body]
+
+	if {$data ne {}} {
+		set resp_data [json::json2dict $data]
+
+		::nfs::Utility::validateResponse $resp_data
+	}
 }
 
 proc createHeader {uri body} {
