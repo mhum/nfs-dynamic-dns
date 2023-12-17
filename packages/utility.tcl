@@ -28,8 +28,10 @@ proc ::nfs::Utility::doIPsMatch {} {
 
 proc ::nfs::Utility::validateResponse {resp} {
   if {[dict exists $resp error]} {
-    puts "ERROR: [dict get $resp error]"
-    puts "ERROR: [dict get $resp debug]"
+    set now [clock seconds]
+
+    puts "[clock format $now -format {%y-%m-%d %H:%M:%S}]: ERROR: [dict get $resp error]"
+    puts "[clock format $now -format {%y-%m-%d %H:%M:%S}]: ERROR: [dict get $resp debug]"
 
     exit
   }
