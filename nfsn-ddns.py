@@ -183,7 +183,8 @@ if __name__ == "__main__":
     ensure_present(nfsn_apikey, "API_KEY")
     ensure_present(nfsn_domain, "DOMAIN")
 
+    v6_enabled=True
 
     check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False)
-    check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=True, create_if_not_exists=False)
-
+    if v6_enabled:
+        check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=True, create_if_not_exists=False)
