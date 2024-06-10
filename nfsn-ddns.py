@@ -7,6 +7,7 @@ import random
 import string
 from datetime import datetime, timezone
 import hashlib
+import argparse
 
 IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
 
@@ -174,6 +175,12 @@ def check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False,
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='automate the updating of domain records to create Dynamic DNS for domains registered with NearlyFreeSpeech.net')
+	# parser.add_argument('integers', metavar='N', type=int, nargs='+',
+	# 					help='an integer for the accumulator')
+    parser.add_argument('--ipv6', '-6', action='store_true', help='also check and update the AAAA (IPv6) records')
+
+    args = parser.parse_args()
     nfsn_username = os.getenv('USERNAME')
     nfsn_apikey = os.getenv('API_KEY')
     nfsn_domain = os.getenv('DOMAIN')
@@ -183,7 +190,7 @@ if __name__ == "__main__":
     ensure_present(nfsn_apikey, "API_KEY")
     ensure_present(nfsn_domain, "DOMAIN")
 
-    v6_enabled=True
+    v6_enabled=args.ipv6 or os.getenv('ENABLE_IPV6') is not None
 
     check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False)
     if v6_enabled:
