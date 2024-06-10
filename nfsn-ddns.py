@@ -79,9 +79,10 @@ def fetchCurrentIP(v6=False):
 def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey, v6=False):
     subdomain = subdomain or ""
     path = f"/dns/{domain}/listRRs"
+    record_type = "A" if not v6 else "AAAA"
     body = {
         "name": subdomain,
-        "type": "A"
+        "type": record_type
     }
     body = urlencode(body)
 
