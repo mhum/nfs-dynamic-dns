@@ -32,8 +32,9 @@ def doIPsMatch(ip1:IPAddress, ip2:IPAddress) -> bool:
     return ip1 == ip2
 
 
-def output(msg, type_msg=None):
-    timestamp = datetime.now().strftime("%y-%m-%d %H:%M:%S")  
+def output(msg, type_msg=None, timestamp=None):
+    if timestamp is None:
+        timestamp = datetime.now().strftime("%y-%m-%d %H:%M:%S")  
     type_str = f"{type_msg}: " if type_msg is not None else ""
     print(f"{timestamp}: {type_str}{msg}")
     
