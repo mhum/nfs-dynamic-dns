@@ -52,7 +52,7 @@ def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
     response = requests.get(url, body=body, headers=headers)
     response.raise_for_status()
 
-    data = response.body()
+    data = response.json()
     validateNFSNResponse(data)
 
     return data
@@ -61,6 +61,18 @@ def fetchCurrentIP():
     response = requests.get(IPV4_PROVIDER_URL)
     response.raise_for_status()
     return response.body().trim()
+
+def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey):
+    path = f"/dns/{domain}/listRRs"
+    body = f"name={subdomain}"
+
+    response_data = makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey)
+
+    if response_data == []:
+        output("No IP address is currently set.")
+        return "UNSET"
+    
+    return response_data[0].get("data")
 
 
 def createNFSNAuthHeader(nfsn_username, nfsn_apikey, uri, body) -> dict[str,str]:
