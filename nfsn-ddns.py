@@ -1,5 +1,4 @@
 import requests
-import argparse
 import os
 from ipaddress import IPv4Address, IPv6Address
 from typing import Union, NewType
