@@ -59,7 +59,8 @@ def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
 def fetchCurrentIP():
     response = requests.get(IPV4_PROVIDER_URL)
     response.raise_for_status()
-    return response.body().trim()
+    return response.text.strip()
+
 
 def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey):
     path = f"/dns/{domain}/listRRs"
