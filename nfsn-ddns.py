@@ -32,6 +32,13 @@ def doIPsMatch(ip1:IPAddress, ip2:IPAddress) -> bool:
     return ip1 == ip2
 
 
+def validateNFSNResponse(response):
+    if response.get("error") is not None:
+        timestamp = datetime.now().strftime("%y-%m-%d %H:%M:%S")  
+        print(f"{timestamp}: ERROR: {response.get('error')}")
+        print(f"{timestamp}: ERROR: {response.get('debug')}")
+
+
 
 def createNFSNAuthHeader(nfsn_username, nfsn_apikey, uri, body) -> dict[str,str]:
     salt = randomRangeString(16)
