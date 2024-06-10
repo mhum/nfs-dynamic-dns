@@ -1,7 +1,11 @@
 import requests
 import argparse
 import os
-import ipaddress
+from ipaddress import IPv4Address, IPv6Address
+from typing import Union, NewType
+
+IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
+
 
 os.getenv('IP_PROVIDER', "http://ipinfo.io/ip")
 os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
