@@ -1,6 +1,6 @@
 import requests
 import os
-from ipaddress import IPv4Address, IPv6Address
+from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import Union, NewType
 import random
 import string
@@ -12,11 +12,6 @@ IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
 
 IPV4_PROVIDER_URL = os.getenv('IP_PROVIDER', "http://ipinfo.io/ip")
 IPV6_PROVIDER_URL = os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
-os.getenv('USERNAME', "http://v6.ipinfo.io/ip")
-os.getenv('API_KEY', "http://v6.ipinfo.io/ip")
-os.getenv('DOMAIN', "http://v6.ipinfo.io/ip")
-# os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
-# os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
 
 NFSN_API_DOMAIN = "https://api.nearlyfreespeech.net"
 
@@ -106,14 +101,49 @@ def createNFSNAuthHeader(nfsn_username, nfsn_apikey, uri, body) -> dict[str,str]
 
 
 
+def updateIPs(domain, subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey):
+    # When there's no existing record for a domain name, the
+    # listRRs API query returns the domain name of the name server.
+    if domain_ip.startswith("nearlyfreespeech.net"):
+        output("The domain IP doesn't appear to be set yet.")
+    else:
+        output(f"Current IP: {current_ip} doesn't match Domain IP: {domain_ip}")
+
+    replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey)
+
+    # Check to see if the update was successful
+
+    new_domain_ip = fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey)
+
+    if doIPsMatch(ip_address(new_domain_ip), ip_address(current_ip)):
+        output(f"IPs match now! Current IP: {current_ip} Domain IP: {domain_ip}")
+    else:
+        output(f"They still don't match. Current IP: {current_ip} Domain IP: {domain_ip}")
+
+
+def ensure_present(value, name):
+    if value is None:
+        raise ValueError(f"Please ensure {name} is set to a value before running this script")
+
+
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description='automate the updating of domain records to create Dynamic DNS for domains registered with NearlyFreeSpeech.net')
-	# parser.add_argument('integers', metavar='N', type=int, nargs='+',
-	# 					help='an integer for the accumulator')
-	# parser.add_argument('--sum', dest='accumulate', action='store_const',
-	# 					const=sum, default=max,
-	# 					help='sum the integers (default: find the max)')
+    nfsn_username = os.getenv('USERNAME')
+    nfsn_apikey = os.getenv('API_KEY')
+    nfsn_domain = os.getenv('DOMAIN')
+    nfsn_subdomain = os.getenv('SUBDOMAIN')
+    
+    ensure_present(nfsn_username, "USERNAME")
+    ensure_present(nfsn_apikey, "API_KEY")
+    ensure_present(nfsn_domain, "DOMAIN")
 
-	args = parser.parse_args()
-	print(args.accumulate(args.integers))
+
+    domain_ip = fetchDomainIP(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey)
+    current_ip = fetchCurrentIP()
+    
+    if doIPsMatch(ip_address(domain_ip), ip_address(current_ip)):
+        output(f"IPs still match!  Current IP: {current_ip} Domain IP: {domain_ip}")
+        return
+    
+    updateIPs(nfsn_domain, nfsn_subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey)
+
