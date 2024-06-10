@@ -88,13 +88,11 @@ def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey, v6=False):
 
     response_data = makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey)
 
-    data = list(filter(lambda r: r['name'] == subdomain, response_data))
-
-    if len(data) == 0:
+    if len(response_data) == 0:
         output("No IP address is currently set.")
         return 
     
-    return data[0].get("data")
+    return response_data[0].get("data")
 
 
 def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=False, ttl=3600, v6=False):
