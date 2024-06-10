@@ -79,8 +79,11 @@ def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey):
     return data[0].get("data")
 
 
-def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey):
-    path = f"/dns/{domain}/replaceRR"
+def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=False):
+
+    action = "replaceRR" if not create else "addRR"
+
+    path = f"/dns/{domain}/{action}"
     subdomain = subdomain or ""
     body = f"name={subdomain}&type=A&data={current_ip}"
 
@@ -114,18 +117,17 @@ def createNFSNAuthHeader(nfsn_username, nfsn_apikey, url_path, body) -> dict[str
 def updateIPs(domain, subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey):
     # When there's no existing record for a domain name, the
     # listRRs API query returns the domain name of the name server.
-    if domain_ip.startswith("nearlyfreespeech.net"):
+    if domain_ip is not None and domain_ip.startswith("nearlyfreespeech.net"):
         output("The domain IP doesn't appear to be set yet.")
     else:
-        output(f"Current IP: {current_ip} doesn't match Domain IP: {domain_ip}")
+        output(f"Current IP: {current_ip} doesn't match Domain IP: {domain_ip or 'UNSET'}")
 
-    replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey)
-
+    replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=domain_ip is None)
     # Check to see if the update was successful
 
     new_domain_ip = fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey)
 
-    if doIPsMatch(ip_address(new_domain_ip), ip_address(current_ip)):
+    if new_domain_ip is not None and doIPsMatch(ip_address(new_domain_ip), ip_address(current_ip)):
         output(f"IPs match now! Current IP: {current_ip} Domain IP: {domain_ip}")
     else:
         output(f"They still don't match. Current IP: {current_ip} Domain IP: {domain_ip}")
@@ -151,7 +153,7 @@ if __name__ == "__main__":
     domain_ip = fetchDomainIP(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey)
     current_ip = fetchCurrentIP()
     
-    if doIPsMatch(ip_address(domain_ip), ip_address(current_ip)):
+    if domain_ip is not None and doIPsMatch(ip_address(domain_ip), ip_address(current_ip)):
         output(f"IPs still match!  Current IP: {current_ip} Domain IP: {domain_ip}")
     else:
         updateIPs(nfsn_domain, nfsn_subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey)
