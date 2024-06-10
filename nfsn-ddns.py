@@ -3,6 +3,8 @@ import argparse
 import os
 from ipaddress import IPv4Address, IPv6Address
 from typing import Union, NewType
+import random
+import string
 
 IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
 
@@ -16,6 +18,10 @@ os.getenv('DOMAIN', "http://v6.ipinfo.io/ip")
 # os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
 
 
+def randomRangeString(length:int) -> str:
+    character_options = string.ascii_uppercase + string.ascii_lowercase + string.digits
+    random_values = [random.choice(character_options) for _ in range(length)]
+    return ''.join(random_values)
 
 
 def doIPsMatch(ip1:IPAddress, ip2:IPAddress):
