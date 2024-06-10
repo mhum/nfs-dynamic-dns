@@ -2,7 +2,7 @@ from urllib.parse import urlencode
 import requests
 import os
 from ipaddress import IPv4Address, IPv6Address, ip_address
-from typing import Union, NewType
+from typing import Union, NewType, Dict
 import random
 import string
 from datetime import datetime, timezone
@@ -118,7 +118,7 @@ def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, cre
     
 
 
-def createNFSNAuthHeader(nfsn_username, nfsn_apikey, url_path, body) -> dict[str,str]:
+def createNFSNAuthHeader(nfsn_username, nfsn_apikey, url_path, body) -> Dict[str,str]:
     # See https://members.nearlyfreespeech.net/wiki/API/Introduction for how this auth process works
 
     salt = randomRangeString(16)
