@@ -88,7 +88,7 @@ def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey):
 
 def createNFSNAuthHeader(nfsn_username, nfsn_apikey, uri, body) -> dict[str,str]:
     salt = randomRangeString(16)
-    timestamp = int(datetime.now(timezone.utc).time().time())
+    timestamp = int(datetime.now(timezone.utc).timestamp())
     uts = f"{nfsn_username};{timestamp};{salt}"
 
     body_hash = str(hashlib.sha1(bytes(body, 'utf-8')))
