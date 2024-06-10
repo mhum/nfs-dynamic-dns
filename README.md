@@ -1,11 +1,11 @@
 # NearlyFreeSpeech.NET Dynamic DNS
-This script will update the `A` DNS record for a domain/subdomain at [NearlyFreeSpeech.NET](https://www.nearlyfreespeech.net)
+This script will update the `A` DNS record (and optionally, the `AAAA` records) for a domain/subdomain at [NearlyFreeSpeech.NET](https://www.nearlyfreespeech.net)
 with the public IP address for the machine the script runs on. Run this script on a server in which the public IP
 address is dynamic and changes so your domain is always up to date.
 
 ## How It Works
 There are two steps to this script. First, it retrieves the configured IP address for the domain/subdomain, the current public
-IP address of the server, and then compares the two. If the public IP address is different, it updates the `A` record of
+IP address of the server, and then compares the two. If the public IP address is different, it updates the `A` (and, if configured, the `AAAA`) record(s) of
 the domain/subdomain with the new IP address.
 
 ## Requirements
