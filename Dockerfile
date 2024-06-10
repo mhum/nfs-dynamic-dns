@@ -1,7 +1,9 @@
 FROM python:3.8-alpine
 # FROM alpine
 
-RUN pip3 install requests
+RUN pip install --upgrade pip
+
+RUN pip3 install requests python-dotenv
 
 COPY *.py /root/
 COPY LICENSE /root/LICENSE
