@@ -143,7 +143,5 @@ if __name__ == "__main__":
     
     if doIPsMatch(ip_address(domain_ip), ip_address(current_ip)):
         output(f"IPs still match!  Current IP: {current_ip} Domain IP: {domain_ip}")
-        return
-    
-    updateIPs(nfsn_domain, nfsn_subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey)
-
+    else:
+        updateIPs(nfsn_domain, nfsn_subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey)
