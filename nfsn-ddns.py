@@ -51,8 +51,11 @@ def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
     headers["Content-Type"] = "application/x-www-form-urlencoded"
 
     response = requests.post(url, data=body, headers=headers)
-
-    data = response.json()
+    # response.raise_for_status()
+    if response.text != "":
+        data = response.json()
+    else:
+        data = ""
     validateNFSNResponse(data)
 
     return data
