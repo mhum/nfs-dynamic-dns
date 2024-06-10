@@ -37,6 +37,14 @@ def output(msg, type_msg=None, timestamp=None):
 def validateNFSNResponse(response):
     if response is None:
         print("none response received")
+        return
+    elif response == "":
+        print("empty string received")
+        return
+    elif response == []:
+        print("empty list received")
+        return
+
     try:
         response = response[0]
     except Exception:
