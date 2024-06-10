@@ -88,7 +88,7 @@ def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey):
     return data[0].get("data")
 
 
-def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=False):
+def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=False, ttl=3600):
 
     action = "replaceRR" if not create else "addRR"
 
@@ -97,7 +97,8 @@ def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, cre
     body = {
         "name": subdomain,
         "type": "A",
-        "data": current_ip
+        "data": current_ip,
+        "ttl": ttl
     }
     body = urlencode(body)
 
