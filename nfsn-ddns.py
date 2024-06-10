@@ -44,9 +44,9 @@ def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
     headers = createNFSNAuthHeader(nfsn_username, nfsn_apikey, url, body)
 
     response = requests.get(url, body=body, headers=headers)
-    
-    data = response.body()
+    response.raise_for_status()
 
+    data = response.body()
     validateNFSNResponse(data)
 
     return data
