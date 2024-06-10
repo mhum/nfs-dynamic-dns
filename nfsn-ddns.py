@@ -63,6 +63,7 @@ def fetchCurrentIP():
 
 
 def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey):
+    subdomain = subdomain or ""
     path = f"/dns/{domain}/listRRs"
     body = f"name={subdomain}"
 
@@ -78,8 +79,8 @@ def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey):
 
 def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey):
     path = f"/dns/{domain}/replaceRR"
-    name = f"name={subdomain}&" if subdomain else ""
-    body = f"{name}type=A&data={current_ip}"
+    subdomain = subdomain or ""
+    body = f"name={subdomain}&type=A&data={current_ip}"
 
     if subdomain == "":
         output(f"Setting {domain} to {current_ip}...")
