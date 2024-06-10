@@ -41,10 +41,9 @@ def validateNFSNResponse(response):
 
 def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
     url = NFSN_API_DOMAIN + path
-    headers = createNFSNAuthHeader(nfsn_username, nfsn_apikey, url, body)
+    headers = createNFSNAuthHeader(nfsn_username, nfsn_apikey, path, body)
 
-    response = requests.get(url, body=body, headers=headers)
-    response.raise_for_status()
+    response = requests.post(url, data=body, headers=headers)
 
     data = response.json()
     validateNFSNResponse(data)
@@ -86,16 +85,16 @@ def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey):
         validateNFSNResponse(response_data)
 
 
-def createNFSNAuthHeader(nfsn_username, nfsn_apikey, uri, body) -> dict[str,str]:
+def createNFSNAuthHeader(nfsn_username, nfsn_apikey, url_path, body) -> dict[str,str]:
     salt = randomRangeString(16)
     timestamp = int(datetime.now(timezone.utc).timestamp())
     uts = f"{nfsn_username};{timestamp};{salt}"
 
-    body_hash = str(hashlib.sha1(bytes(body, 'utf-8')))
+    body_hash = hashlib.sha1(bytes(body, 'utf-8')).hexdigest()
 
-    msg = f"{uts};{nfsn_apikey};{uri};{body_hash}"
+    msg = f"{uts};{nfsn_apikey};{url_path};{body_hash}"
 
-    full_hash = str(hashlib.sha1(bytes(msg, 'utf-8')))
+    full_hash = hashlib.sha1(bytes(msg, 'utf-8')).hexdigest()
 
     return {"X-NFSN-Authentication": f"{uts};{full_hash}"}
 
