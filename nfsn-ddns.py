@@ -1,3 +1,4 @@
+from urllib.parse import urlencode
 import requests
 import os
 from ipaddress import IPv4Address, IPv6Address, ip_address
@@ -69,7 +70,11 @@ def fetchCurrentIP():
 def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey):
     subdomain = subdomain or ""
     path = f"/dns/{domain}/listRRs"
-    body = f"name={subdomain}"
+    body = {
+        "name": subdomain,
+        "type": "A"
+    }
+    body = urlencode(body)
 
     response_data = makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey)
 
@@ -89,7 +94,12 @@ def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, cre
 
     path = f"/dns/{domain}/{action}"
     subdomain = subdomain or ""
-    body = f"name={subdomain}&type=A&data={current_ip}"
+    body = {
+        "name": subdomain,
+        "type": "A",
+        "data": current_ip
+    }
+    body = urlencode(body)
 
     if subdomain == "":
         output(f"Setting {domain} to {current_ip}...")
