@@ -69,13 +69,13 @@ def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
 
     return data
 
-def fetchCurrentIP():
-    response = requests.get(IPV4_PROVIDER_URL)
+def fetchCurrentIP(v6=False):
+    response = requests.get(IPV4_PROVIDER_URL if not v6 else IPV6_PROVIDER_URL)
     response.raise_for_status()
     return response.text.strip()
 
 
-def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey):
+def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey, v6=False):
     subdomain = subdomain or ""
     path = f"/dns/{domain}/listRRs"
     body = {
@@ -95,24 +95,25 @@ def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey):
     return data[0].get("data")
 
 
-def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=False, ttl=3600):
+def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=False, ttl=3600, v6=False):
 
     action = "replaceRR" if not create else "addRR"
 
     path = f"/dns/{domain}/{action}"
     subdomain = subdomain or ""
+    record_type = "A" if not v6 else "AAAA"
     body = {
         "name": subdomain,
-        "type": "A",
+        "type": record_type,
         "data": current_ip,
         "ttl": ttl
     }
     body = urlencode(body)
 
     if subdomain == "":
-        output(f"Setting {domain} to {current_ip}...")
+        output(f"Setting {record_type} record on {domain} to {current_ip}...")
     else:
-        output(f"Setting {subdomain}.{domain} to {current_ip}...")
+        output(f"Setting {record_type} record on {subdomain}.{domain} to {current_ip}...")
 
     makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey)
     
@@ -136,7 +137,7 @@ def createNFSNAuthHeader(nfsn_username, nfsn_apikey, url_path, body) -> Dict[str
 
 
 
-def updateIPs(domain, subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey):
+def updateIPs(domain, subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey, v6=False):
     # When there's no existing record for a domain name, the
     # listRRs API query returns the domain name of the name server.
     if domain_ip is not None and domain_ip.startswith("nearlyfreespeech.net"):
@@ -144,10 +145,10 @@ def updateIPs(domain, subdomain, domain_ip, current_ip, nfsn_username, nfsn_apik
     else:
         output(f"Current IP: {current_ip} doesn't match Domain IP: {domain_ip or 'UNSET'}")
 
-    replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=domain_ip is None)
+    replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=domain_ip is None, v6=v6)
     # Check to see if the update was successful
 
-    new_domain_ip = fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey)
+    new_domain_ip = fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey, v6=v6)
 
     if new_domain_ip is not None and doIPsMatch(ip_address(new_domain_ip), ip_address(current_ip)):
         output(f"IPs match now! Current IP: {current_ip} Domain IP: {domain_ip}")
