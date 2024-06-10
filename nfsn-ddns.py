@@ -24,7 +24,7 @@ def randomRangeString(length:int) -> str:
     return ''.join(random_values)
 
 
-def doIPsMatch(ip1:IPAddress, ip2:IPAddress):
+def doIPsMatch(ip1:IPAddress, ip2:IPAddress) -> bool:
     return ip1 == ip2
 
 
