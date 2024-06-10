@@ -89,10 +89,8 @@ def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey):
     else:
         output(f"Setting {subdomain}.{domain} to {current_ip}...")
 
-    response_data = makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey)
+    makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey)
     
-    if response_data != {}:
-        validateNFSNResponse(response_data)
 
 
 def createNFSNAuthHeader(nfsn_username, nfsn_apikey, url_path, body) -> dict[str,str]:
