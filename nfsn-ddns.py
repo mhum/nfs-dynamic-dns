@@ -75,6 +75,22 @@ def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey):
     return response_data[0].get("data")
 
 
+
+def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey):
+    path = f"/dns/{domain}/replaceRR"
+    body = f"name={subdomain}&type=A&data={current_ip}"
+
+    if subdomain == "":
+        output(f"Setting {domain} to {current_ip}...")
+    else:
+        output(f"Setting {subdomain}.{domain} to {current_ip}...")
+
+    response_data = makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey)
+    
+    if response_data != {}:
+        validateNFSNResponse(response_data)
+
+
 def createNFSNAuthHeader(nfsn_username, nfsn_apikey, uri, body) -> dict[str,str]:
     salt = randomRangeString(16)
     timestamp = int(datetime.now(timezone.utc).time().time())
