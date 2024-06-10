@@ -25,6 +25,8 @@ Configurations are set by providing the script with environment variables
 | DOMAIN | Y | Domain that the subdomain belongs to |
 | SUBDOMAIN | N | Subdomain to update with the script. Leave blank for the bare domain name |
 | IP_PROVIDER | N | Use a different IP providing service than the default: [http://ipinfo.io/ip](http://ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
+| IPV6_PROVIDER | N | Use a different IP providing service than the default: [http://v6.ipinfo.io/ip](http://v6.ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
+| ENABLE_IPV6 | N | Set this to any value to also cause the script to check for and update AAAA records on the specified domain. |
 
 ## Running
 ### Manually
