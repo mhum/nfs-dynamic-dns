@@ -39,6 +39,18 @@ def validateNFSNResponse(response):
         print(f"{timestamp}: ERROR: {response.get('debug')}")
 
 
+def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
+    url = NFSN_API_DOMAIN + path
+    headers = createNFSNAuthHeader(nfsn_username, nfsn_apikey, url, body)
+
+    response = requests.get(url, body=body, headers=headers)
+    
+    data = response.body()
+
+    validateNFSNResponse(data)
+
+    return data
+
 
 def createNFSNAuthHeader(nfsn_username, nfsn_apikey, uri, body) -> dict[str,str]:
     salt = randomRangeString(16)
