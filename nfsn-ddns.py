@@ -5,6 +5,8 @@ from ipaddress import IPv4Address, IPv6Address
 from typing import Union, NewType
 import random
 import string
+from datetime import datetime, timezone
+import hashlib
 
 IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
 
@@ -28,6 +30,22 @@ def randomRangeString(length:int) -> str:
 
 def doIPsMatch(ip1:IPAddress, ip2:IPAddress) -> bool:
     return ip1 == ip2
+
+
+
+def createNFSNAuthHeader(nfsn_username, nfsn_apikey, uri, body) -> dict[str,str]:
+    salt = randomRangeString(16)
+    timestamp = int(datetime.now(timezone.utc).time().time())
+    uts = f"{nfsn_username};{timestamp};{salt}"
+
+    body_hash = str(hashlib.sha1(bytes(body, 'utf-8')))
+
+    msg = f"{uts};{nfsn_apikey};{uri};{body_hash}"
+
+    full_hash = str(hashlib.sha1(bytes(msg, 'utf-8')))
+
+    return {"X-NFSN-Authentication": f"{uts};{full_hash}"}
+
 
 
 
