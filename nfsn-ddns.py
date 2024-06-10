@@ -96,10 +96,13 @@ def replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey):
 
 
 def createNFSNAuthHeader(nfsn_username, nfsn_apikey, url_path, body) -> dict[str,str]:
+    # See https://members.nearlyfreespeech.net/wiki/API/Introduction for how this auth process works
+
     salt = randomRangeString(16)
     timestamp = int(datetime.now(timezone.utc).timestamp())
     uts = f"{nfsn_username};{timestamp};{salt}"
-
+    # "If there is no request body, the SHA1 hash of the empty string must be used."
+    body = body or ""
     body_hash = hashlib.sha1(bytes(body, 'utf-8')).hexdigest()
 
     msg = f"{uts};{nfsn_apikey};{url_path};{body_hash}"
