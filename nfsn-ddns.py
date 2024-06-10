@@ -137,7 +137,7 @@ def createNFSNAuthHeader(nfsn_username, nfsn_apikey, url_path, body) -> Dict[str
 
 
 
-def updateIPs(domain, subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey, v6=False):
+def updateIPs(domain, subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False):
     # When there's no existing record for a domain name, the
     # listRRs API query returns the domain name of the name server.
     if domain_ip is not None and domain_ip.startswith("nearlyfreespeech.net"):
@@ -145,7 +145,7 @@ def updateIPs(domain, subdomain, domain_ip, current_ip, nfsn_username, nfsn_apik
     else:
         output(f"Current IP: {current_ip} doesn't match Domain IP: {domain_ip or 'UNSET'}")
 
-    replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=domain_ip is None, v6=v6)
+    replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=domain_ip is None and create_if_not_exists, v6=v6)
     # Check to see if the update was successful
 
     new_domain_ip = fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey, v6=v6)
@@ -161,7 +161,7 @@ def ensure_present(value, name):
         raise ValueError(f"Please ensure {name} is set to a value before running this script")
 
 
-def check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False):
+def check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False):
 
     domain_ip = fetchDomainIP(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=v6)
     current_ip = fetchCurrentIP(v6=v6)
@@ -184,6 +184,6 @@ if __name__ == "__main__":
     ensure_present(nfsn_domain, "DOMAIN")
 
 
-    check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False)
-    check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=True)
+    check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False)
+    check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=True, create_if_not_exists=False)
 
