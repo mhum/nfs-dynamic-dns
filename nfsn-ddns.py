@@ -18,6 +18,9 @@ os.getenv('DOMAIN', "http://v6.ipinfo.io/ip")
 
 
 
+def doIPsMatch(ip1:IPAddress, ip2:IPAddress):
+    return ip1 == ip2
+
 
 
 if __name__ == "__main__":
