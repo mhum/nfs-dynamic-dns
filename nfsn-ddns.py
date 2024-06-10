@@ -48,6 +48,7 @@ def validateNFSNResponse(response):
 def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
     url = NFSN_API_DOMAIN + path
     headers = createNFSNAuthHeader(nfsn_username, nfsn_apikey, path, body)
+    headers["Content-Type"] = "application/x-www-form-urlencoded"
 
     response = requests.post(url, data=body, headers=headers)
 
