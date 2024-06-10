@@ -19,6 +19,6 @@ RUN mkdir /logs
 WORKDIR /root
 
 ARG CRON_SCHEDULE="*/30 * * * *"
-RUN echo "$(crontab -l 2>&1; echo "${CRON_SCHEDULE} /root/dns.tcl")" | crontab -
+RUN echo "$(crontab -l 2>&1; echo "${CRON_SCHEDULE} python3 /root/nfsn-ddns.py")" | crontab -
 
 CMD ["crond", "-f", "2>&1"]
