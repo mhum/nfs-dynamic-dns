@@ -17,6 +17,8 @@ os.getenv('DOMAIN', "http://v6.ipinfo.io/ip")
 # os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
 # os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
 
+NFSN_API_DOMAIN = "https://api.nearlyfreespeech.net"
+
 
 def randomRangeString(length:int) -> str:
     character_options = string.ascii_uppercase + string.ascii_lowercase + string.digits
