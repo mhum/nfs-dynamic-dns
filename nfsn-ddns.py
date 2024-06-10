@@ -34,6 +34,12 @@ def output(msg, type_msg=None, timestamp=None):
     
 
 def validateNFSNResponse(response):
+    if response is None:
+        print("none response received")
+    try:
+        response = response[0]
+    except Exception:
+        pass
     if response.get("error") is not None:
         output(response.get('error'), type_msg="ERROR")
         output(response.get('debug'), type_msg="ERROR")
