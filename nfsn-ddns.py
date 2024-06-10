@@ -51,6 +51,11 @@ def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
 
     return data
 
+def fetchCurrentIP():
+    response = requests.get(IPV4_PROVIDER_URL)
+    response.raise_for_status()
+    return response.body().trim()
+
 
 def createNFSNAuthHeader(nfsn_username, nfsn_apikey, uri, body) -> dict[str,str]:
     salt = randomRangeString(16)
