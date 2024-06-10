@@ -161,6 +161,17 @@ def ensure_present(value, name):
         raise ValueError(f"Please ensure {name} is set to a value before running this script")
 
 
+def check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False):
+
+    domain_ip = fetchDomainIP(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=v6)
+    current_ip = fetchCurrentIP(v6=v6)
+    
+    if domain_ip is not None and doIPsMatch(ip_address(domain_ip), ip_address(current_ip)):
+        output(f"IPs still match!  Current IP: {current_ip} Domain IP: {domain_ip}")
+        return
+    
+    updateIPs(nfsn_domain, nfsn_subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey, v6=v6)
+
 
 if __name__ == "__main__":
     nfsn_username = os.getenv('USERNAME')
@@ -173,10 +184,6 @@ if __name__ == "__main__":
     ensure_present(nfsn_domain, "DOMAIN")
 
 
-    domain_ip = fetchDomainIP(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey)
-    current_ip = fetchCurrentIP()
-    
-    if domain_ip is not None and doIPsMatch(ip_address(domain_ip), ip_address(current_ip)):
-        output(f"IPs still match!  Current IP: {current_ip} Domain IP: {domain_ip}")
-    else:
-        updateIPs(nfsn_domain, nfsn_subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey)
+    check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False)
+    check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=True)
+
