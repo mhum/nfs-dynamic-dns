@@ -1,11 +1,11 @@
 # NearlyFreeSpeech.NET Dynamic DNS
-This script will update the `A` DNS record for a domain/subdomain at [NearlyFreeSpeech.NET](https://www.nearlyfreespeech.net)
+This script will update the `A` DNS record (and optionally, the `AAAA` records) for a domain/subdomain at [NearlyFreeSpeech.NET](https://www.nearlyfreespeech.net)
 with the public IP address for the machine the script runs on. Run this script on a server in which the public IP
 address is dynamic and changes so your domain is always up to date.
 
 ## How It Works
 There are two steps to this script. First, it retrieves the configured IP address for the domain/subdomain, the current public
-IP address of the server, and then compares the two. If the public IP address is different, it updates the `A` record of
+IP address of the server, and then compares the two. If the public IP address is different, it updates the `A` (and, if configured, the `AAAA`) record(s) of
 the domain/subdomain with the new IP address.
 
 ## Requirements
@@ -25,6 +25,8 @@ Configurations are set by providing the script with environment variables
 | DOMAIN | Y | Domain that the subdomain belongs to |
 | SUBDOMAIN | N | Subdomain to update with the script. Leave blank for the bare domain name |
 | IP_PROVIDER | N | Use a different IP providing service than the default: [http://ipinfo.io/ip](http://ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
+| IPV6_PROVIDER | N | Use a different IP providing service than the default: [http://v6.ipinfo.io/ip](http://v6.ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
+| ENABLE_IPV6 | N | Set this to any value to also cause the script to check for and update AAAA records on the specified domain. |
 
 ## Running
 ### Manually
