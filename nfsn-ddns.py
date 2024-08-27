@@ -8,6 +8,7 @@ import string
 from datetime import datetime, timezone
 import hashlib
 import argparse
+from dotenv import load_dotenv
 
 IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
 
@@ -162,9 +163,6 @@ def ensure_present(value, name):
 
 
 def check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False):
-
-    domain_ip = fetchDomainIP(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=v6)
-    current_ip = fetchCurrentIP(v6=v6)
     
     if domain_ip is not None and doIPsMatch(ip_address(domain_ip), ip_address(current_ip)):
         output(f"IPs still match!  Current IP: {current_ip} Domain IP: {domain_ip}")
@@ -179,6 +177,9 @@ if __name__ == "__main__":
 	# 					help='an integer for the accumulator')
     parser.add_argument('--ipv6', '-6', action='store_true', help='also check and update the AAAA (IPv6) records')
 
+    #load variables set in .env file
+    load_dotenv()
+    
     args = parser.parse_args()
     nfsn_username = os.getenv('USERNAME')
     nfsn_apikey = os.getenv('API_KEY')
