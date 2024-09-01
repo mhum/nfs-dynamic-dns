@@ -13,10 +13,6 @@ from dotenv import load_dotenv
 
 IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
 
-
-IPV4_PROVIDER_URL = os.getenv('IP_PROVIDER', "http://ipinfo.io/ip")
-IPV6_PROVIDER_URL = os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
-
 NFSN_API_DOMAIN = "https://api.nearlyfreespeech.net"
 
 
@@ -73,10 +69,11 @@ def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
     return data
 
 def fetchCurrentIP(v6=False):
-    response = requests.get(IPV4_PROVIDER_URL if not v6 else IPV6_PROVIDER_URL)
-    response.raise_for_status()
-    return response.text.strip()
-
+    #Use the system's dig command to ask a DNS server for my IP address
+    #https://unix.stackexchange.com/questions/22615/how-can-i-get-my-external-ip-address-in-a-shell-script
+    ip_version = "-4" if not v6 else "-6"
+    command_string = "dig {} TXT +short o-o.myaddr.l.google.com @ns1.google.com".format(ip_version)
+    return os.popen(command_string).read().split()[0].replace('"', '')
 
 def fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey, v6=False):
     subdomain = subdomain or ""
@@ -166,9 +163,7 @@ def ensure_present(value, name):
 def check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False):
 
     domain_ip = fetchDomainIP(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=v6)
-    #    current_ip = fetchCurrentIP(v6=v6)
-    current_ip = os.popen("dig -4 TXT +short o-o.myaddr.l.google.com @ns1.google.com").read().split()[0]
-    current_ip = current_ip.replace('"', '')
+    current_ip = fetchCurrentIP(v6=v6)
     
     if domain_ip is not None and doIPsMatch(ip_address(domain_ip), ip_address(current_ip)):
         output(f"IPs still match!  Current IP: {current_ip} Domain IP: {domain_ip}")
