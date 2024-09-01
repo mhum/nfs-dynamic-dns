@@ -8,6 +8,7 @@ import string
 from datetime import datetime, timezone
 import hashlib
 import argparse
+from dotenv import load_dotenv
 
 IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
 
@@ -179,6 +180,9 @@ if __name__ == "__main__":
 	# 					help='an integer for the accumulator')
     parser.add_argument('--ipv6', '-6', action='store_true', help='also check and update the AAAA (IPv6) records')
 
+    #load variables set in .env file
+    load_dotenv()
+    
     args = parser.parse_args()
     nfsn_username = os.getenv('USERNAME')
     nfsn_apikey = os.getenv('API_KEY')
