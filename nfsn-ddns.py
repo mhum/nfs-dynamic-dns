@@ -13,11 +13,12 @@ from dotenv import load_dotenv
 
 IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
 
+
 IPV4_PROVIDER_URL = os.getenv('IP_PROVIDER', "http://ipinfo.io/ip")
 IPV6_PROVIDER_URL = os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
 
 NFSN_API_DOMAIN = "https://api.nearlyfreespeech.net"
-    
+
 
 def randomRangeString(length:int) -> str:
     character_options = string.ascii_uppercase + string.ascii_lowercase + string.digits
@@ -202,6 +203,5 @@ if __name__ == "__main__":
 
     use_dig_command = os.getenv('IP_USE_DIG', args.useDig)
     v6_enabled = os.getenv('ENABLE_IPV6', args.ipv6)
-    print(use_dig_command)
 
     check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=v6_enabled, dig=use_dig_command, create_if_not_exists=False)
