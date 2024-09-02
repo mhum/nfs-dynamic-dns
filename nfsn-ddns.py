@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 
 IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
 
+#load variables set in .env file
+load_dotenv()
 
 IPV4_PROVIDER_URL = os.getenv('IP_PROVIDER', "http://ipinfo.io/ip")
 IPV6_PROVIDER_URL = os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
@@ -190,8 +192,6 @@ if __name__ == "__main__":
     parser.add_argument('--useDig', '-d', action='store_true', help='use the dig command to query dns')
     args = parser.parse_args()
     
-    #load variables set in .env file
-    load_dotenv()
     nfsn_username = os.getenv('USERNAME')
     nfsn_apikey = os.getenv('API_KEY')
     nfsn_domain = os.getenv('DOMAIN')
