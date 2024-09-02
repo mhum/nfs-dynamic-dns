@@ -13,8 +13,11 @@ from dotenv import load_dotenv
 
 IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
 
-NFSN_API_DOMAIN = "https://api.nearlyfreespeech.net"
+IPV4_PROVIDER_URL = os.getenv('IP_PROVIDER', "http://ipinfo.io/ip")
+IPV6_PROVIDER_URL = os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
 
+NFSN_API_DOMAIN = "https://api.nearlyfreespeech.net"
+    
 
 def randomRangeString(length:int) -> str:
     character_options = string.ascii_uppercase + string.ascii_lowercase + string.digits
@@ -68,7 +71,12 @@ def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
 
     return data
 
-def fetchCurrentIP(v6=False):
+def fetchCurrentIP(v6=False): 
+    response = requests.get(IPV4_PROVIDER_URL if not v6 else IPV6_PROVIDER_URL)        
+    response.raise_for_status()
+    return response.text.strip()
+
+def digCurrentIP(v6=False):
     #Use the system's dig command to ask a DNS server for my IP address
     #https://unix.stackexchange.com/questions/22615/how-can-i-get-my-external-ip-address-in-a-shell-script
     ip_version = "-4" if not v6 else "-6"
@@ -160,10 +168,13 @@ def ensure_present(value, name):
         raise ValueError(f"Please ensure {name} is set to a value before running this script")
 
 
-def check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False):
+def check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False, dig=False, create_if_not_exists=False):
 
     domain_ip = fetchDomainIP(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=v6)
-    current_ip = fetchCurrentIP(v6=v6)
+    if dig:
+        current_ip = digCurrentIP(v6=v6)
+    else:
+        current_ip = fetchCurrentIP(v6=v6)
     
     if domain_ip is not None and doIPsMatch(ip_address(domain_ip), ip_address(current_ip)):
         output(f"IPs still match!  Current IP: {current_ip} Domain IP: {domain_ip}")
@@ -175,11 +186,11 @@ def check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False,
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='automate the updating of domain records to create Dynamic DNS for domains registered with NearlyFreeSpeech.net')
     parser.add_argument('--ipv6', '-6', action='store_true', help='also check and update the AAAA (IPv6) records')
-
+    parser.add_argument('--useDig', '-d', action='store_true', help='use the dig command to query dns')
+    args = parser.parse_args()
+    
     #load variables set in .env file
     load_dotenv()
-
-    args = parser.parse_args()
     nfsn_username = os.getenv('USERNAME')
     nfsn_apikey = os.getenv('API_KEY')
     nfsn_domain = os.getenv('DOMAIN')
@@ -189,8 +200,8 @@ if __name__ == "__main__":
     ensure_present(nfsn_apikey, "API_KEY")
     ensure_present(nfsn_domain, "DOMAIN")
 
-    v6_enabled=args.ipv6 or os.getenv('ENABLE_IPV6') is not None
+    use_dig_command = os.getenv('IP_USE_DIG', args.useDig)
+    v6_enabled = os.getenv('ENABLE_IPV6', args.ipv6)
+    print(use_dig_command)
 
-    check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False)
-    if v6_enabled:
-        check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=True, create_if_not_exists=False)
+    check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=v6_enabled, dig=use_dig_command, create_if_not_exists=False)
