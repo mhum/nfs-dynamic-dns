@@ -71,8 +71,8 @@ def makeNFSNHTTPRequest(path, body, nfsn_username, nfsn_apikey):
 
     return data
 
-def fetchCurrentIP(v6=False): 
-    response = requests.get(IPV4_PROVIDER_URL if not v6 else IPV6_PROVIDER_URL)        
+def fetchCurrentIP(v6=False):
+    response = requests.get(IPV4_PROVIDER_URL if not v6 else IPV6_PROVIDER_URL)
     response.raise_for_status()
     return response.text.strip()
 
