@@ -15,18 +15,19 @@ the domain/subdomain with the new IP address.
 Both can be downloaded from pip using `pip install -r requirements.txt`
 
 ## Configuring
-Configurations are set by providing the script with environment variables
+Configurations are set by providing the script with environment variables or command line arguments.
 
 ### Configs
-| Env Variable | Required | Description |
-| --- | --- | --- |
-| USERNAME | Y | Your NFSN username |
-| API_KEY | Y | API key for using NFSN's APIs. This can be obtained via the Member Interface > "Profile" tab > "Actions" > "Manage API Key" |
-| DOMAIN | Y | Domain that the subdomain belongs to |
-| SUBDOMAIN | N | Subdomain to update with the script. Leave blank for the bare domain name |
-| IP_PROVIDER | N | Use a different IP providing service than the default: [http://ipinfo.io/ip](http://ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
-| IPV6_PROVIDER | N | Use a different IP providing service than the default: [http://v6.ipinfo.io/ip](http://v6.ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
-| ENABLE_IPV6 | N | Set this to any value to also cause the script to check for and update AAAA records on the specified domain. |
+| Env Variable | Command Line Argument | Required | Description |
+| --- | --- | --- | --- |
+| USERNAME | | Y | Your NFSN username |
+| API_KEY | | Y | API key for using NFSN's APIs. This can be obtained via the Member Interface > "Profile" tab > "Actions" > "Manage API Key" |
+| DOMAIN | | Y | Domain that the subdomain belongs to |
+| SUBDOMAIN | | N | Subdomain to update with the script. Leave blank for the bare domain name |
+| IP_PROVIDER | | N | Use a different IP providing service than the default: [http://ipinfo.io/ip](http://ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
+| IPV6_PROVIDER | | N | Use a different IP providing service than the default: [http://v6.ipinfo.io/ip](http://v6.ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
+| ENABLE_IPV6 | `--ipv6` or `-6` | N | Set this to any value to also cause the script to check for and update AAAA records on the specified domain. |
+| IP_USE_DIG | `--useDig` or `-d` | N | Use the system's *dig* command and Google's DNS server to determine the IP address instead of an IP providing service over HTTP |
 
 ## Running
 ### Manually
@@ -34,7 +35,12 @@ It is as easy as running: `python3 ./nfsn-ddns.py` (after installing the depende
 
 To include all of the environmental variables inline when running, you can do something like this:
 ```bash
-$ export USERNAME=username API_KEY=api_key DOMAIN=domain.com SUBDOMAIN=subdomain && python3 ./nfsn-ddns.py 
+$ export USERNAME=username API_KEY=api_key DOMAIN=domain.com SUBDOMAIN=subdomain && python3 ./nfsn-ddns.py
+```
+
+or with optional command line arguments like this:
+```bash
+$ export USERNAME=username API_KEY=api_key DOMAIN=domain.com SUBDOMAIN=subdomain && python3 ./nfsn-ddns.py --useDig
 ```
 
 or you can put your variables in a `.env` file:
