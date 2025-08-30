@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import Union, NewType, Dict
 from urllib.parse import urlencode
+from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
@@ -155,6 +156,38 @@ def getAllDNSRecords(domain, nfsn_username, nfsn_apikey):
 
     return response_data
 
+def NFSNDnsToZoneFile(dnsRecords):
+
+    def sortKey(record):
+        host = record.get("name")
+        return ("@" if host == "" else host) \
+            + record.get("data")
+        
+
+    dnsRecords = sorted(dnsRecords, key=sortKey )
+    
+    outputList = []
+    for record in dnsRecords:
+        host = record.get("name")
+        host = "@" if host == "" else host
+        record_type = record.get("type")
+        data = record.get("data")
+        if record_type == "TXT":
+            data = f'"{data}"'
+        elif record_type == "MX":
+            data = f'{record.get("aux")} {data}'
+        outputList.append(
+            '\t'.join([
+                host,
+                str(record.get("ttl")),
+                "IN",
+                record_type,
+                data
+            ])
+        )
+    outputList.append("")
+    return outputList
+
 def updateIPs(domain, subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False):
     # When there's no existing record for a domain name, the
     # listRRs API query returns the domain name of the name server.
@@ -198,6 +231,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='automate the updating of domain records to create Dynamic DNS for domains registered with NearlyFreeSpeech.net')
     parser.add_argument('--ipv6', '-6', action='store_true', help='also check and update the AAAA (IPv6) records')
     parser.add_argument('--useDig', '-d', action='store_true', help='use the dig command to query dns')
+    parser.add_argument('--export-to', help='the filename to export the zone file to')
     args = parser.parse_args()
     
     nfsn_username = os.getenv('USERNAME')
@@ -209,7 +243,17 @@ if __name__ == "__main__":
     ensure_present(nfsn_apikey, "API_KEY")
     ensure_present(nfsn_domain, "DOMAIN")
 
-    use_dig_command = os.getenv('IP_USE_DIG', args.useDig)
-    v6_enabled = os.getenv('ENABLE_IPV6', args.ipv6)
+    if args.export_to:
 
-    check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=v6_enabled, dig=use_dig_command, create_if_not_exists=False)
+        dns = getAllDNSRecords(nfsn_domain, nfsn_username, nfsn_apikey)
+
+        zonedata = NFSNDnsToZoneFile(dns)
+
+        Path(args.export_to).write_text('\n'.join(zonedata), encoding='utf-8')
+    else:
+        use_dig_command = os.getenv('IP_USE_DIG', args.useDig)
+        v6_enabled = os.getenv('ENABLE_IPV6', args.ipv6)
+
+        check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=v6_enabled, dig=use_dig_command, create_if_not_exists=False)
+    
+    
