@@ -146,6 +146,14 @@ def createNFSNAuthHeader(nfsn_username, nfsn_apikey, url_path, body) -> Dict[str
     return {"X-NFSN-Authentication": f"{uts};{full_hash}"}
 
 
+def getAllDNSRecords(domain, nfsn_username, nfsn_apikey):
+    action = "listRRs"
+
+    path = f"/dns/{domain}/{action}"
+
+    response_data = makeNFSNHTTPRequest(path, None, nfsn_username, nfsn_apikey)
+
+    return response_data
 
 def updateIPs(domain, subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False):
     # When there's no existing record for a domain name, the
