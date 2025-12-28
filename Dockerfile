@@ -1,24 +1,37 @@
 FROM python:3.8-alpine
-# FROM alpine
 
+# Install dependencies
 RUN pip install --upgrade pip
-
 RUN pip3 install requests python-dotenv
+RUN apk add --no-cache curl socat bash openssl
 
+# Copy scripts and docs
 COPY *.py /root/
+COPY entrypoint.sh /root/entrypoint.sh
 COPY LICENSE /root/LICENSE
 COPY README.md /root/README.md
 
-# RUN echo '@community http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories && \
-# 	echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories && \
-# 	apk add --upgrade --no-cache --update ca-certificates wget git curl openssh tar gzip python3 apk-tools@edge && \
-# 	apk upgrade --update --no-cache
+RUN chmod +x /root/entrypoint.sh
 
-RUN mkdir /logs
+# Install acme.sh
+RUN curl -sSL https://get.acme.sh | sh
+
+# Install NFSN DNS plugin for acme.sh
+COPY dns_nfsn.sh /root/.acme.sh/dnsapi/dns_nfsn.sh
+RUN chmod +x /root/.acme.sh/dnsapi/dns_nfsn.sh
+
+# Directories for logs and certs
+RUN mkdir -p /logs /certs && chmod 777 /logs
 
 WORKDIR /root
 
+# Set cron schedules (with backwards compatibility)
 ARG CRON_SCHEDULE="*/30 * * * *"
-RUN echo "$(crontab -l 2>&1; echo "${CRON_SCHEDULE} python3 /root/nfsn-ddns.py")" | crontab -
+ARG DDNS_CRON="${CRON_SCHEDULE}"
+ARG CERT_CRON="0 3 * * *"
 
-CMD ["crond", "-f", "2>&1"]
+# Convert to ENV for runtime use in entrypoint.sh
+ENV DDNS_CRON="${DDNS_CRON}"
+ENV CERT_CRON="${CERT_CRON}"
+
+ENTRYPOINT ["/root/entrypoint.sh"]
