@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    tags: ["v*"]
   pull_request:
     branches: [ "main" ]
 
@@ -10,8 +10,7 @@ jobs:
 
   push-image:
     name: Push image
-    # We don't push images on pull requests
-    if: github.event_name != 'pull_request'
+    if: github.ref_type == 'tag'
     permissions:
       contents: read #  to fetch code (actions/checkout)
       packages: write #  to push docker image
@@ -38,10 +37,12 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: index,manifest
         with:
           images: ghcr.io/${{ github.repository_owner }}/nfs-dynamic-dns
-          # Pushes to the main branch update the *:devel-latest tag
-          # Releases update the *:latest tag and the *:<version> tag
           tags: |
-            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Build and push
         id: push
         uses: docker/build-push-action@v6
@@ -52,3 +53,4 @@ jobs:
           # Only push if we've tagged the image in the metadata step
           push: ${{ steps.meta.outputs.tags != '' }}
           tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

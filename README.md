@@ -62,12 +62,9 @@ SUBDOMAIN=
 ### With Docker Compose
 You can use the following config to run this with [docker compose](https://docs.docker.com/compose/).
 ```yaml
-version: "3"
-
 services:
   nfs-dynamic-dns:
-    image: nfs-dynamic-dns
-    build: ./nfs-dynamic-dns
+    image: ghcr.io/mhum/nfs-dynamic-dns:latest
     container_name: nfs-dynamic-dns
     network_mode: host
     environment:
@@ -97,8 +94,6 @@ With docker, the build step (step 2) can be done like this:
 
 With docker compose, it can be done like this:
 ```yaml
-version: "3"
-
 services:
   nfs-dynamic-dns:
     image: nfs-dynamic-dns
