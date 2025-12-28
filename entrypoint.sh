@@ -21,7 +21,7 @@ crontab -r 2>/dev/null || true
 # Conditional DDNS cron setup
 if [ "$ENABLE_DDNS" = "true" ]; then
   echo "[INIT] Setting up DDNS cron: $DDNS_CRON"
-  (crontab -l 2>/dev/null; echo "$DDNS_CRON python3 /root/nfsn-ddns.py >> /logs/ddns.log 2>&1") | crontab -
+  echo "$DDNS_CRON python3 /root/nfsn-ddns.py >> /logs/ddns.log 2>&1" >> /tmp/crontab.tmp
 else
   echo "[INIT] DDNS disabled"
 fi
@@ -40,6 +40,7 @@ if [ "$ENABLE_CERTS" = "true" ]; then
     $CERT_HOME/acme.sh --issue \
       -d "$DOMAIN" -d "*.$DOMAIN" \
       --dns dns_nfsn \
+      --server letsencrypt \
       --cert-file "$DOMAIN_CERT_FILE" \
       --key-file "$DOMAIN_KEY_FILE" \
       --home "$CERT_HOME" || echo "[ERROR] Cert issuing failed, will retry via cron"
@@ -49,14 +50,20 @@ if [ "$ENABLE_CERTS" = "true" ]; then
 
   # Add renewal cron
   echo "[INIT] Setting up ACME renewal cron: $CERT_CRON"
-  (crontab -l 2>/dev/null; echo "$CERT_CRON $CERT_HOME/acme.sh --renew --home $CERT_HOME --cron >> /logs/acme.log 2>&1") | crontab -
+  echo "$CERT_CRON $CERT_HOME/acme.sh --renew --home $CERT_HOME --cron >> /logs/acme.log 2>&1" >> /tmp/crontab.tmp
 else
   echo "[INIT] Certificate management disabled"
 fi
 
-# Show final crontab for debugging
-echo "[INIT] Final crontab:"
-crontab -l || echo "  (empty)"
+# Install the final crontab
+crontab /tmp/crontab.tmp
+rm /tmp/crontab.tmp
 
-# Start cron in foreground
-exec crond -f -d 8
+# If arguments passed, execute them; otherwise start cron
+if [ $# -gt 0 ]; then
+  echo "[INIT] Executing: $@"
+  exec "$@"
+else
+  echo "[INIT] Starting crond in foreground"
+  exec crond -f -d 8
+fi

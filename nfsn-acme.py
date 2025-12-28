@@ -34,8 +34,8 @@ if __name__ == "__main__":
     command = sys.argv[1]
     if command == "auth":
         token = sys.argv[2]
-        domain = sys.argv[3]
-        createTxtRecord(f"_acme-challenge.{domain}", token, nfsn_domain, nfsn_username, nfsn_apikey)
+        subdomain = sys.argv[3]
+        createTxtRecord(subdomain, token, nfsn_domain, nfsn_username, nfsn_apikey)
     elif command == "cleanup":
-        domain = sys.argv[2]
-        deleteTxtRecord(f"_acme-challenge.{domain}", nfsn_domain, nfsn_username, nfsn_apikey)
+        subdomain = sys.argv[2]
+        deleteTxtRecord(subdomain, nfsn_domain, nfsn_username, nfsn_apikey)
