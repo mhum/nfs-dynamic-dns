@@ -47,6 +47,10 @@ jobs:
             org.opencontainers.image.description=Dynamic DNS automation and Let's Encrypt certificate management for NearlyFreeSpeech.NET
             org.opencontainers.image.licenses=MIT
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          annotations: |
+            org.opencontainers.image.description=Dynamic DNS automation and Let's Encrypt certificate management for NearlyFreeSpeech.NET
+            org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
 
       - name: Build and push
         id: push
@@ -59,3 +63,4 @@ jobs:
           push: ${{ steps.meta.outputs.tags != '' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
