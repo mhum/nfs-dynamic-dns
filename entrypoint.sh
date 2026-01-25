@@ -41,7 +41,7 @@ if [ "$ENABLE_CERTS" = "true" ]; then
       -d "$DOMAIN" -d "*.$DOMAIN" \
       --dns dns_nfsn \
       --server letsencrypt \
-      --cert-file "$DOMAIN_CERT_FILE" \
+      --fullchain-file "$DOMAIN_CERT_FILE" \
       --key-file "$DOMAIN_KEY_FILE" \
       --home "$CERT_HOME" || echo "[ERROR] Cert issuing failed, will retry via cron"
   else
