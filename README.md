@@ -72,6 +72,15 @@ ENABLE_CERTS=false      # Enable Let's Encrypt certs (default: false)
 #IPV6_PROVIDER=http://v6.ipinfo.io/ip
 ```
 
+### With Cron
+To run the script on a schedule, it can be set up as a cron job (e.g. every 30 minutes):
+
+```bash
+*/30 * * * * export USERNAME=username API_KEY=api_key DOMAIN=domain.com SUBDOMAIN=subdomain && /path/to/venv/bin/python3 /path/to/nfsn-ddns.py >> ~/nfsn-ddns.log 2>&1
+```
+
+**Note:** Use the full path to your virtualenv's `python3` so cron can find the installed dependencies. The `>> ~/nfsn-ddns.log 2>&1` part redirects output to a log file in your home directory.
+
 ### With Docker
 1. Set the configuration values in the script the way you want them (or create a file containing the environment variables)
 2. Build the image with `docker build -t nfs-dynamic-dns .`
