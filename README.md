@@ -28,6 +28,7 @@ Configurations are set by providing the script with environment variables or com
 | ENABLE_CERTS | | N | Enable Let's Encrypt certificate issuing and renewal via ACME DNS-01 challenge. Defaults to `false`. Set to `true` to enable certificate management. |
 | DDNS_CRON | | N | Cron schedule for DDNS updates. Defaults to `*/30 * * * *` (every 30 minutes). Only used if `ENABLE_DDNS=true`. Can also be set at build time via `--build-arg`. |
 | CERT_CRON | | N | Cron schedule for certificate renewal checks. Defaults to `0 3 * * *` (daily at 3 AM). Only used if `ENABLE_CERTS=true`. Can also be set at build time via `--build-arg`. |
+| LE_CONFIG_HOME | | N | Directory acme.sh uses for its renewal state. Defaults to `/root/.acme.sh`, which is not persisted across container recreates. Set to a mounted path such as `/acme-state` when `ENABLE_CERTS=true`. |
 | IP_PROVIDER | | N | Use a different IP providing service than the default: [http://ipinfo.io/ip](http://ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
 | IPV6_PROVIDER | | N | Use a different IP providing service than the default: [http://v6.ipinfo.io/ip](http://v6.ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
 | ENABLE_IPV6 | `--ipv6` or `-6` | N | Set this to any value to also cause the script to check for and update AAAA records on the specified domain. |
@@ -154,18 +155,25 @@ This application can automatically issue and renew Let's Encrypt certificates us
 - Set `ENABLE_CERTS=true` environment variable
 - Ensure `DOMAIN` environment variable is set (certificates will be issued for `$DOMAIN` and `*.$DOMAIN`)
 - Mount a volume to `/certs` to persist certificates outside the container
+- Set `LE_CONFIG_HOME=/acme-state` and mount a volume there to persist acme.sh's renewal state
+
+**Note:** mounting `/certs` alone is not enough. acme.sh keeps its account key and per-certificate config under `/root/.acme.sh`, which is lost whenever the container is recreated. The certificate files survive, but acme.sh no longer has any record of the certificate and the renewal cron silently stops renewing it — the certificate then expires with nothing logged as an error. Don't mount a volume over `/root/.acme.sh` itself; that path is also the acme.sh install directory, and mounting over it hides the `acme.sh` script and the `dns_nfsn` plugin.
 
 ### Certificate Paths
 Certificates are stored in `/certs`:
-- Certificate: `/certs/$DOMAIN.crt`
+- Certificate (full chain): `/certs/$DOMAIN.crt`
 - Private key: `/certs/$DOMAIN.key`
+
+Renewal state is stored in `/acme-state`. It contains your ACME account key, so keep it out of version control.
 
 ### Docker Example with Certificates
 ```bash
 docker run -d \
   --name nfsn-dynamic-dns \
   --env-file .env \
+  -e LE_CONFIG_HOME=/acme-state \
   -v /path/to/certs:/certs \
+  -v /path/to/acme-state:/acme-state \
   nfs-dynamic-dns
 ```
 
@@ -191,9 +199,11 @@ services:
       - SUBDOMAIN=subdomain
       - ENABLE_DDNS=true
       - ENABLE_CERTS=true
+      - LE_CONFIG_HOME=/acme-state
     volumes:
       - ./certs:/certs
       - ./logs:/logs
+      - ./acme-state:/acme-state
     restart: unless-stopped
 ```
 
@@ -207,7 +217,9 @@ docker run -d \
   -e DOMAIN=domain.com \
   -e ENABLE_DDNS=false \
   -e ENABLE_CERTS=true \
+  -e LE_CONFIG_HOME=/acme-state \
   -v /path/to/certs:/certs \
+  -v /path/to/acme-state:/acme-state \
   nfs-dynamic-dns
 ```
 
@@ -217,18 +229,24 @@ To manually issue a certificate inside the container:
 docker exec nfsn-dynamic-dns /root/.acme.sh/acme.sh --issue \
   -d domain.com -d "*.domain.com" \
   --dns dns_nfsn \
-  --cert-file /certs/domain.com.crt \
+  --server letsencrypt \
+  --fullchain-file /certs/domain.com.crt \
   --key-file /certs/domain.com.key \
   --home /root/.acme.sh
 ```
+
+acme.sh defaults to ZeroSSL, so `--server letsencrypt` is needed to match what the entrypoint uses.
 
 To force renewal:
 ```bash
 docker exec nfsn-dynamic-dns /root/.acme.sh/acme.sh --renew \
   -d domain.com \
   --force \
+  --ecc \
   --home /root/.acme.sh
 ```
+
+Certificates are issued as ECDSA, so `--ecc` is needed when renewing by name.
 
 ### Customizing Certificate Renewal Schedule
 Both DDNS and certificate renewal schedules can be customized via environment variables:
