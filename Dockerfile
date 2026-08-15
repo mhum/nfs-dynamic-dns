@@ -1,4 +1,4 @@
-FROM python:3.8-alpine
+FROM python:3.14-alpine
 
 LABEL org.opencontainers.image.description DESCRIPTION="Dynamic DNS automation and Let's Encrypt certificate management for NearlyFreeSpeech.NET"
 LABEL org.opencontainers.image.licenses LICENSE="MIT"
@@ -6,7 +6,8 @@ LABEL org.opencontainers.image.source SOURCE="https://github.com/mhum/nfs-dynami
 
 # Install dependencies
 RUN pip install --upgrade pip
-RUN pip3 install requests python-dotenv
+COPY requirements.txt /root/requirements.txt
+RUN pip3 install -r /root/requirements.txt
 RUN apk add --no-cache curl socat bash openssl
 
 # Copy scripts and docs
