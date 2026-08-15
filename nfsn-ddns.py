@@ -159,6 +159,14 @@ def main(argv=None) -> int:
     parser.add_argument('--export-to', help='the filename to export the zone file to')
     args = parser.parse_args(argv)
 
+    # Misconfiguration is a user error, not a crash: report it in one line.
+    try:
+        return run(args)
+    except ValueError as error:
+        output(error, type_msg="ERROR")
+        return 1
+
+def run(args) -> int:
     nfsn_username = os.getenv('USERNAME')
     nfsn_apikey = os.getenv('API_KEY')
     nfsn_domain = os.getenv('DOMAIN')

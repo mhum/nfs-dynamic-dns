@@ -76,9 +76,15 @@ def test_env_var_can_re_enable_ipv4_over_the_cli_flag(ddns, creds, calls, monkey
 
 
 def test_disabling_both_families_is_rejected(ddns, creds, calls):
-    with pytest.raises(ValueError, match="ENABLE_IPV4"):
-        ddns.main(["--no-ipv4"])
+    assert ddns.main(["--no-ipv4"]) == 1
     assert calls == []
+
+
+def test_disabling_both_families_explains_why(ddns, creds, calls, capsys):
+    ddns.main(["--no-ipv4"])
+    printed = capsys.readouterr().out
+    assert "ENABLE_IPV4" in printed
+    assert "Traceback" not in printed
 
 
 def test_dig_preference_reaches_every_family(ddns, creds, calls, monkeypatch):
@@ -107,9 +113,18 @@ def test_subdomain_is_passed_through(ddns, creds, calls, monkeypatch):
 @pytest.mark.parametrize("missing", ["USERNAME", "API_KEY", "DOMAIN"])
 def test_missing_credentials_are_rejected(ddns, creds, calls, monkeypatch, missing):
     monkeypatch.delenv(missing)
-    with pytest.raises(ValueError, match=missing):
-        ddns.main([])
+    assert ddns.main([]) == 1
     assert calls == []
+
+
+@pytest.mark.parametrize("missing", ["USERNAME", "API_KEY", "DOMAIN"])
+def test_missing_credentials_name_the_missing_variable(ddns, creds, monkeypatch,
+                                                       calls, capsys, missing):
+    monkeypatch.delenv(missing)
+    ddns.main([])
+    printed = capsys.readouterr().out
+    assert missing in printed
+    assert "Traceback" not in printed
 
 
 class TestFailureIsolation:
