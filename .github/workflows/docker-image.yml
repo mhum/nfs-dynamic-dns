@@ -8,6 +8,30 @@ on:
 
 jobs:
 
+  build-image:
+    name: Build image
+    # Proves the image still builds before a tag makes it too late to find out.
+    if: github.ref_type != 'tag'
+    permissions:
+      contents: read #  to fetch code (actions/checkout)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   push-image:
     name: Push image
     if: github.ref_type == 'tag'

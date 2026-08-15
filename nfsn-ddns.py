@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 import requests
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from pathlib import Path
@@ -12,8 +13,32 @@ IPAddress = NewType("IPAddress", Union[IPv4Address, IPv6Address])
 IPV4_PROVIDER_URL = os.getenv('IP_PROVIDER', "http://ipinfo.io/ip")
 IPV6_PROVIDER_URL = os.getenv('IPV6_PROVIDER', "http://v6.ipinfo.io/ip")
 
-def doIPsMatch(ip1:IPAddress, ip2:IPAddress) -> bool:
-    return ip1 == ip2
+# Values that turn a flag off when supplied through the environment. Anything
+# else counts as on, so `ENABLE_IPV6=1` and `ENABLE_IPV6=yes` both work.
+FALSY_ENV_VALUES = frozenset(["", "0", "false", "no", "off"])
+
+def env_flag(name, default=False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return bool(default)
+    return value.strip().lower() not in FALSY_ENV_VALUES
+
+def doIPsMatch(ip1, ip2) -> bool:
+    try:
+        return ip_address(ip1) == ip_address(ip2)
+    except ValueError:
+        return False
+
+def isDomainIPUnset(domain_ip) -> bool:
+    # With no record in place, listRRs answers with the name server's domain
+    # rather than an address, so anything unparseable means "not set yet".
+    if domain_ip is None:
+        return True
+    try:
+        ip_address(domain_ip)
+    except ValueError:
+        return True
+    return False
 
 def fetchCurrentIP(v6=False):
     response = requests.get(IPV4_PROVIDER_URL if not v6 else IPV6_PROVIDER_URL)
@@ -91,19 +116,19 @@ def NFSNDnsToZoneFile(dnsRecords):
     return outputList
 
 def updateIPs(domain, subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey, v6=False, create_if_not_exists=False):
-    # When there's no existing record for a domain name, the
-    # listRRs API query returns the domain name of the name server.
-    if domain_ip is not None and domain_ip.startswith("nearlyfreespeech.net"):
+    unset = isDomainIPUnset(domain_ip)
+
+    if unset:
         output("The domain IP doesn't appear to be set yet.")
     else:
-        output(f"Current IP: {current_ip} doesn't match Domain IP: {domain_ip or 'UNSET'}")
+        output(f"Current IP: {current_ip} doesn't match Domain IP: {domain_ip}")
 
-    replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=domain_ip is None and create_if_not_exists, v6=v6)
+    replaceDomain(domain, subdomain, current_ip, nfsn_username, nfsn_apikey, create=unset and create_if_not_exists, v6=v6)
     # Check to see if the update was successful
 
     new_domain_ip = fetchDomainIP(domain, subdomain, nfsn_username, nfsn_apikey, v6=v6)
 
-    if new_domain_ip is not None and doIPsMatch(ip_address(new_domain_ip), ip_address(current_ip)):
+    if doIPsMatch(new_domain_ip, current_ip):
         output(f"IPs match now! Current IP: {current_ip} Domain IP: {domain_ip}")
     else:
         output(f"They still don't match. Current IP: {current_ip} Domain IP: {domain_ip}")
@@ -120,19 +145,28 @@ def check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=False,
     else:
         current_ip = fetchCurrentIP(v6=v6)
 
-    if domain_ip is not None and doIPsMatch(ip_address(domain_ip), ip_address(current_ip)):
+    if doIPsMatch(domain_ip, current_ip):
         output(f"IPs still match!  Current IP: {current_ip} Domain IP: {domain_ip}")
         return
 
-    updateIPs(nfsn_domain, nfsn_subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey, v6=v6)
+    updateIPs(nfsn_domain, nfsn_subdomain, domain_ip, current_ip, nfsn_username, nfsn_apikey, v6=v6, create_if_not_exists=create_if_not_exists)
 
-if __name__ == "__main__":
+def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description='automate the updating of domain records to create Dynamic DNS for domains registered with NearlyFreeSpeech.net')
-    parser.add_argument('--ipv6', '-6', action='store_true', help='also check and update the AAAA (IPv6) records')
+    parser.add_argument('--ipv6', '-6', action='store_true', help='also check and update the AAAA (IPv6) record')
+    parser.add_argument('--no-ipv4', action='store_true', help='skip the A (IPv4) record; combine with --ipv6 for an IPv6-only run')
     parser.add_argument('--useDig', '-d', action='store_true', help='use the dig command to query dns')
     parser.add_argument('--export-to', help='the filename to export the zone file to')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
+    # Misconfiguration is a user error, not a crash: report it in one line.
+    try:
+        return run(args)
+    except ValueError as error:
+        output(error, type_msg="ERROR")
+        return 1
+
+def run(args) -> int:
     nfsn_username = os.getenv('USERNAME')
     nfsn_apikey = os.getenv('API_KEY')
     nfsn_domain = os.getenv('DOMAIN')
@@ -149,8 +183,29 @@ if __name__ == "__main__":
         zonedata = NFSNDnsToZoneFile(dns)
 
         Path(args.export_to).write_text('\n'.join(zonedata), encoding='utf-8')
-    else:
-        use_dig_command = os.getenv('IP_USE_DIG', args.useDig)
-        v6_enabled = os.getenv('ENABLE_IPV6', args.ipv6)
+        return 0
 
-        check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=v6_enabled, dig=use_dig_command, create_if_not_exists=False)
+    use_dig_command = env_flag('IP_USE_DIG', args.useDig)
+    v4_enabled = env_flag('ENABLE_IPV4', not args.no_ipv4)
+    v6_enabled = env_flag('ENABLE_IPV6', args.ipv6)
+
+    if not v4_enabled and not v6_enabled:
+        raise ValueError("Nothing to update: enable at least one of ENABLE_IPV4 or ENABLE_IPV6")
+
+    # IPv4 goes first so a host without working IPv6 still gets its A record
+    # updated before the AAAA attempt fails.
+    families = [v6 for v6, enabled in ((False, v4_enabled), (True, v6_enabled)) if enabled]
+
+    failed = False
+    for v6 in families:
+        try:
+            check_ips(nfsn_domain, nfsn_subdomain, nfsn_username, nfsn_apikey, v6=v6, dig=use_dig_command, create_if_not_exists=True)
+        except Exception as error:
+            record_type = "AAAA" if v6 else "A"
+            output(f"Could not update the {record_type} record: {error}", type_msg="ERROR")
+            failed = True
+
+    return 1 if failed else 0
+
+if __name__ == "__main__":
+    sys.exit(main())
