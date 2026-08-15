@@ -30,8 +30,11 @@ Configurations are set by providing the script with environment variables or com
 | CERT_CRON | | N | Cron schedule for certificate renewal checks. Defaults to `0 3 * * *` (daily at 3 AM). Only used if `ENABLE_CERTS=true`. Can also be set at build time via `--build-arg`. |
 | IP_PROVIDER | | N | Use a different IP providing service than the default: [http://ipinfo.io/ip](http://ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
 | IPV6_PROVIDER | | N | Use a different IP providing service than the default: [http://v6.ipinfo.io/ip](http://v6.ipinfo.io/ip) This might be useful if the default provider is unavailable or is blocked. The alternate provider MUST be served over `http` (please open an issue if this is ever a problem) and MUST return ONLY the IP in the response body |
-| ENABLE_IPV6 | `--ipv6` or `-6` | N | Set this to any value to also cause the script to check for and update AAAA records on the specified domain. |
+| ENABLE_IPV4 | `--no-ipv4` | N | Update the A (IPv4) record. Defaults to `true`. Set to `false` (or pass `--no-ipv4`) together with IPv6 for an IPv6-only run. |
+| ENABLE_IPV6 | `--ipv6` or `-6` | N | Also check and update the AAAA (IPv6) record on the specified domain, in addition to the A record. Defaults to `false`. |
 | IP_USE_DIG | `--useDig` or `-d` | N | Use the system's *dig* command and Google's DNS server to determine the IP address instead of an IP providing service over HTTP |
+
+Boolean environment variables accept `true`, `1`, `yes` and `on` to enable, and `false`, `0`, `no`, `off` or an empty value to disable.
 
 ## Running
 ### Manually
@@ -64,8 +67,11 @@ ENABLE_CERTS=false      # Enable Let's Encrypt certs (default: false)
 #DDNS_CRON=*/30 * * * *  # Every 30 minutes (default)
 #CERT_CRON=0 3 * * *     # Daily at 3 AM (default)
 
-# Optional: IPv6 support
+# Optional: also update the AAAA record
 #ENABLE_IPV6=true
+
+# Optional: set false with ENABLE_IPV6=true for an IPv6-only run
+#ENABLE_IPV4=true
 
 # Optional: Customize IP providers
 #IP_PROVIDER=http://ipinfo.io/ip
@@ -238,6 +244,16 @@ environment:
   - DDNS_CRON=*/15 * * * *      # Check DDNS every 15 minutes
   - CERT_CRON=0 2 * * *         # Check renewal daily at 2 AM
 ```
+
+## Development
+Install the test dependencies and run the suite:
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+The tests run entirely offline — no NFSN credentials or network access needed.
 
 ## Troubleshooting
 The script communicates with NearlyFreeSpeech.NET via its RESTful API. Specifics about the API can be found [here](https://members.nearlyfreespeech.net/wiki/API/Introduction).
